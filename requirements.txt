@@ -1,0 +1,5 @@
+pymongo
+fastapi[standard]
+yfinance
+pyjwt
+passlib
