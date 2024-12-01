@@ -1,14 +1,17 @@
-from fastapi import APIRouter, HTTPException, status, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, status, WebSocket, WebSocketDisconnect, Depends
 import yfinance as yf
 import asyncio
 import json
+from typing import Annotated
+from app.model.auth import User
+from app.routes.auth import get_current_active_user
 
 from datetime import datetime
 
 router = APIRouter(prefix="/api/tickers")
 
 @router.get("/{ticker}")
-def get_price(ticker: str):
+def get_price(ticker: str, current_user: Annotated[User, Depends(get_current_active_user)]):
     ticker_obj = yf.Ticker(ticker)
     try:
         return {'ticker':ticker, 'price': ticker_obj.fast_info['lastPrice'], 'currency': ticker_obj.fast_info['currency']}
@@ -17,7 +20,7 @@ def get_price(ticker: str):
 
 
 @router.websocket("/{ticker}/subscribe")
-async def subscribe_price(ws: WebSocket, ticker: str):
+async def subscribe_price(ws: WebSocket, ticker: str, current_user: Annotated[User, Depends(get_current_active_user)]):
     await ws.accept()
     try:
         while True:  

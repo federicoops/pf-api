@@ -2,10 +2,11 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 import uuid
+from app.model.pyobjectid import PyObjectId
 
 # Define the Transaction model
 class Transaction(BaseModel):
-    id: str = Field(default_factory=uuid.uuid4, alias="_id")
+    id: PyObjectId = Field(default_factory=uuid.uuid4, alias="_id")
     category: str   # Mandatory field for category
     account: str  # Mandatory field for account
     amount: float  # Mandatory field for transaction amount
@@ -13,7 +14,8 @@ class Transaction(BaseModel):
     description: Optional[str] = ""  # Optional description with default as an empty string
     price: float = -1  # Default to -1 if not provided
     ticker: Optional[str] = ""  # Optional ticker with default as an empty string
-
+    class Config:
+        arbitrary_types_allowed = True
 
 class TransactionUpdate(BaseModel):
     category: Optional[str] = None  # Optional field for category
