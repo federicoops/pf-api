@@ -1,5 +1,7 @@
 from typing import Union
 import os
+from fastapi.staticfiles import StaticFiles
+
 from fastapi import FastAPI
 from app.routes.transactions import router as tx_router
 from app.routes.accounts import router as acc_router
@@ -9,6 +11,7 @@ from app.routes.auth import router as auth_router
 from pymongo import MongoClient
 
 app = FastAPI()
+app.mount("/app", StaticFiles(directory="static",html = True), name="static")
 
 @app.on_event("startup")
 def startup_db_client():

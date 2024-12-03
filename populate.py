@@ -34,7 +34,7 @@ def populate():
     mongo_client = MongoClient(MONGO_URI)
     db = mongo_client[MONGO_DB]
 
-    data = pd.read_csv("demo_data.csv")
+    data = pd.read_csv("new_demo_data.csv")
     data.Importo = data.Importo.str.replace(".","").str.replace(",",".").astype(float)
 
     account_cache = dict()
@@ -78,4 +78,4 @@ def populate():
 
 
 populate_user()
-#populate()
+populate()

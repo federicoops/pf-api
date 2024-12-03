@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Client UI</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="apiclient.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Home</h1>
+        
+        <!-- Authentication Section -->
+        <div id="auth-section">
+            <h2 class="hide-after-login">Login</h2>
+            <form id="login-form" class="hide-after-login">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <div id="login-feedback" class="mt-3"></div>
+        </div>
+
+        <!-- Accounts Section -->
+        <div id="accounts-section" class="show-after-login">
+            <h2>Accounts</h2>
+            <ul id="account-list">
+
+            </ul>
+        </div>
+
+        <hr>
+
+        <!-- Transactions Section -->
+        <div id="transactions-section" class="show-after-login">
+            <h2>Transactions</h2>
+            <input type="date" id="tr-start" name="tr-start" />
+            <input type="date" id="tr-end" name="tr-end"/>
+
+            <button id="list-transactions" class="btn btn-secondary">Filtra</button>
+            <div class="mt-3">
+                <table id="transactions-table" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Importo</th>
+                            <th>Data</th>
+                            <th>Categoria</th>
+                            <th>Conto</th>
+                            <th>Descrizione</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+ 
+
+        $(document).ready(function () {
+            $(".show-after-login").hide()
+            const host = window.location.protocol + "//" + window.location.host;
+            alert(host)
+            const apiClient = new ApiClient(`${host}`);
+
+            // Initialize DataTable
+            const transactionsTable = $("#transactions-table").DataTable({
+                order: [[1, 'desc']]
+            });
+            today = new Date();
+            today.setDate(today.getDate()+1)
+            const startOfTime = new Date(1900, 0, 2);
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+
+            const todayFormatted = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+            $('#tr-end').val(todayFormatted);
+
+            // Get the start of the current month
+            const startOfMonthFormatted = startOfMonth.toISOString().split('T')[0];
+
+            $('#tr-start').val(startOfMonthFormatted);
+            
+            account_map = new Map()
+            // Login form submission
+            $("#login-form").on("submit", async function (e) {
+                e.preventDefault();
+
+                const username = $("#username").val();
+                const password = $("#password").val();
+
+                try {
+                    const loginResponse = await apiClient.login(username, password);
+                    $(".hide-after-login").hide();
+                    $("#login-feedback").html(`<div class="alert alert-success">Welcome</div>`);
+                    const accounts = await apiClient.listAccounts()
+                    accounts.forEach(account => {
+                        account_map.set(account._id, account)
+                    })
+
+                    const cashNet = await apiClient.aggregateTransactions(startOfTime.toISOString().split('T')[0], todayFormatted, 'account')
+                    cashNet.forEach(accountNet => {
+                        const account = account_map.get(accountNet._id)
+                        $("#account-list").append(`<li>${account.name}: ${accountNet.total.toFixed(2)} €</li>`)
+                    })
+                    $(".show-after-login").show()
+                } catch (error) {
+                    $("#login-feedback").html(`<div class="alert alert-danger">Login failed: ${error.message}</div>`);
+                }
+            });
+
+            // List transactions
+            $("#list-transactions").on("click", async function () {
+                try {
+                    let start_date = $("#tr-start").val()
+                    let end_date = $("#tr-end").val()
+                    
+                    const transactions = await apiClient.listTransactions(start_date, end_date);
+
+                    // Clear existing data in DataTable
+                    transactionsTable.clear();
+
+                    // Populate table
+                    transactions.forEach(transaction => {
+                        const account = account_map.get(transaction.account)
+                        const date = new Date(transaction.date)
+                        transactionsTable.row.add([
+                            `${transaction.amount} €`,
+                            date.toISOString().split('T')[0],
+                            transaction.category,
+                            account.name,                    
+                            transaction.description || "N/A",
+                        ]);
+                    });
+
+                    // Redraw the table
+                    transactionsTable.draw();
+                } catch (error) {
+                    alert(`Failed to fetch transactions: ${error.message}`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

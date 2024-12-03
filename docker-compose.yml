@@ -21,6 +21,8 @@ services:
       - mongodb
     ports:
       - "8000:8000"
+    volumes:
+      - ./static:/pfapi/static/
     environment:
       MONGO_URI: mongodb://root:example@mongodb:27017
       MONGO_DB: pf-api
