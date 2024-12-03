@@ -14,3 +14,4 @@ class Account(BaseModel):
 
 class AccountUpdate(BaseModel):
     name: Optional[str] = None  # Optional field for name
+    asset_type: Optional[str] = None # Optional asset type (e.g. cash, stocks/etf, crypto, house, car etc etc)

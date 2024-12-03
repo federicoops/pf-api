@@ -3,3 +3,4 @@ fastapi[standard]
 yfinance
 pyjwt
 passlib
+bcrypt==4.0.1
