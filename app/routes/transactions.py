@@ -33,14 +33,25 @@ async def list_transactions(
     end_date: datetime = datetime.today(),
     aggregate: str = None):
 
-    pipeline = [
-        {"$match": {"date": {"$gte": start_date, "$lte": end_date}, "price":{"$exists": False}}},  # Filter by date range, exclude etf/stocks buying
-    ]
-    
-    if aggregate is not None:
-        pipeline.append({"$group": {"_id": f"${aggregate}", "total": {"$sum": "$amount"}}})
+    if aggregate is None or aggregate not in ["ticker", "category", "account"]:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Aggregation group not specified or invalid")
+       
+    if aggregate != "ticker":
+            
+        pipeline = [
+            {"$match": {"date": {"$gte": start_date, "$lte": end_date}, "price":{"$exists": False}}},  # Filter by date range, exclude etf/stocks buying
+            {"$group": {"_id": f"${aggregate}", "total": {"$sum": "$amount"}}}
+        ]
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Aggregation group not specified")
+        pipeline = [
+            {"$match": {"ticker":{"$exists": True}, "quantity":{"$exists": True} }},
+            {"$group": {"_id": "$ticker",
+                        "quantity": {"$sum": "$quantity"},
+                        "total_wfee": {"$sum": "$amount"} ,
+                        "total":{ "$sum": { "$multiply": [ "$price", "$quantity" ] }} 
+                    }
+            }
+        ]
 
     transactions = list(request.app.db["transactions"].aggregate(pipeline))
     return transactions

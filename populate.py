@@ -76,6 +76,49 @@ def populate():
         inserted = db["transactions"].insert_one(tx)
         print(f"Inserted transaction {inserted.inserted_id}")
 
+    data = pd.read_csv("demo_inv.csv")
+    data.Importo = data.Importo.str.replace(".","").str.replace(",",".").astype(float)
+    data.Prezzo = data.Prezzo.str.replace(".","").str.replace(",",".").astype(float)
+    data.Quantita = data.Quantita.str.replace(".","").str.replace(",",".").astype(float)
+
+    for idx, row in data.iterrows():
+        account_id = retrieve_account(row.Conto)
+        try:
+            datetime_object = datetime.strptime(row["Informazioni cronologiche"], '%d/%m/%Y %H.%M.%S')
+        except:
+            datetime_object = datetime.strptime(row["Informazioni cronologiche"], '%d/%m/%Y')
+
+        tx = {
+            "amount":row.Importo,
+            "category":row.Categoria,
+            "date":datetime_object,
+            "account":str(account_id),
+            "description":str(row.Descrizione),
+            "price": row.Prezzo, 
+            "quantity": row.Quantita,
+            "ticker": row.Ticker
+        }       
+        inserted = db["transactions"].insert_one(tx)
+        print(f"Inserted investment {inserted.inserted_id}")
 
 populate_user()
 populate()
+
+
+mongo_client = MongoClient(MONGO_URI)
+db = mongo_client[MONGO_DB]
+
+pipeline = [
+    {"$match": {"ticker":{"$exists": True}, "quantity":{"$exists": True} }},
+    {"$group": {"_id": "$ticker",
+                "quantity": {"$sum": "$quantity"},
+                "total_wfee": {"$sum": "$amount"} ,
+                "total_net":{ "$sum": { "$multiply": [ "$price", "$quantity" ] }} 
+            }
+    }
+]
+
+transactions = list(db["transactions"].aggregate(pipeline))
+
+for t in transactions:
+    print(t)
