@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="apiclient.js"></script>
+    <script src="index.js"></script>
+
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
@@ -37,17 +39,22 @@
             <ul id="account-list">
 
             </ul>
+            <hr>
         </div>
 
-        <!-- Accounts Section -->
+        
+
+
+        <!-- Stocks Section -->
         <div id="stocks-section" class="show-after-login">
             <h2>Stocks/ETF</h2>
             <ul id="stocks-list">
                 
             </ul>
+            <hr>
         </div>        
 
-        <hr>
+       
 
         <!-- Transactions Section -->
         <div id="transactions-section" class="show-after-login">
@@ -74,33 +81,27 @@
     </div>
 
     <script>
- 
-
         $(document).ready(function () {
             $(".show-after-login").hide()
             const host = window.location.protocol + "//" + window.location.host;
-            const apiClient = new ApiClient(`${host}`);
+            $.apiClient = new ApiClient(`${host}`);
 
             // Initialize DataTable
-            const transactionsTable = $("#transactions-table").DataTable({
+            $.transactionsTable = $("#transactions-table").DataTable({
                 order: [[1, 'desc']]
             });
-            today = new Date();
-            today.setDate(today.getDate()+1)
-            const startOfTime = new Date(1900, 0, 2);
-            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-
-            const todayFormatted = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-            $('#tr-end').val(todayFormatted);
-
-            // Get the start of the current month
-            const startOfMonthFormatted = startOfMonth.toISOString().split('T')[0];
-
-            $('#tr-start').val(startOfMonthFormatted);
             
-            account_map = new Map()
-            // Login form submission
+            // APPLICATION DATA STATUS STORE
+            $.accounts = {}
+            $.stocks = {}
+            $.transactions = {}
+            // -----------------------------
+
+            // Check for session token in storage
+            if($.apiClient.isLogged())
+                onLoginSuccess()
+            
+                // Login form submission
             $("#login-form").on("submit", async function (e) {
                 e.preventDefault();
 
@@ -108,31 +109,8 @@
                 const password = $("#password").val();
 
                 try {
-                    const loginResponse = await apiClient.login(username, password);
-                    $(".hide-after-login").hide();
-                    $("#login-feedback").html(`<div class="alert alert-success">Welcome</div>`);
-                    const accounts = await apiClient.listAccounts()
-                    accounts.forEach(account => {
-                        account_map.set(account._id, account)
-                    })
-
-                    const cashNet = await apiClient.aggregateTransactions(startOfTime.toISOString().split('T')[0], todayFormatted, 'account')
-                    cashNet.forEach(accountNet => {
-                        const account = account_map.get(accountNet._id)
-                        $("#account-list").append(`<li>${account.name}: ${accountNet.total.toFixed(2)} €</li>`)
-                    })
-
-                    const stockAssets = await apiClient.aggregateTransactions(todayFormatted, todayFormatted, 'ticker')
-                    stockAssets.forEach(stock => {
-                        stock_id = stock._id.replace(".","")
-                        $("#stocks-list").append(`<li id="${stock_id}">${stock._id}: ${stock.quantity}, ${stock.total_wfee}  €`)
-                        apiClient.getTickerPrice(stock._id).then(data => {
-                            data.price = data.price.toFixed(1)
-                            $(`#${data.ticker.replace(".","")}`).append(`, <em>${data.price}  €</em>`)
-                        })
-                    })
-
-                    $(".show-after-login").show()
+                    const loginResponse = await $.apiClient.login(username, password);
+                    onLoginSuccess()
                 } catch (error) {
                     $("#login-feedback").html(`<div class="alert alert-danger">Login failed: ${error.message}</div>`);
                 }
@@ -144,26 +122,8 @@
                     let start_date = $("#tr-start").val()
                     let end_date = $("#tr-end").val()
                     
-                    const transactions = await apiClient.listTransactions(start_date, end_date);
-
-                    // Clear existing data in DataTable
-                    transactionsTable.clear();
-
-                    // Populate table
-                    transactions.forEach(transaction => {
-                        const account = account_map.get(transaction.account)
-                        const date = new Date(transaction.date)
-                        transactionsTable.row.add([
-                            `${transaction.amount} €`,
-                            date.toISOString().split('T')[0],
-                            transaction.category,
-                            account.name,                    
-                            transaction.description || "N/A",
-                        ]);
-                    });
-
-                    // Redraw the table
-                    transactionsTable.draw();
+                    const transactions = await $.apiClient.listTransactions(start_date, end_date);
+                    onTransactionFetched(transactions)
                 } catch (error) {
                     alert(`Failed to fetch transactions: ${error.message}`);
                 }

@@ -1,7 +1,12 @@
 class ApiClient {
     constructor(baseURL) {
         this.baseURL = baseURL;
-        this.accessToken = null;
+        this.accessToken = window.localStorage.getItem('token') ;
+    }
+
+
+    async isLogged() {
+        return this.accessToken != null;
     }
 
     // Helper method to make API requests
@@ -62,6 +67,7 @@ class ApiClient {
 
         const result = await response.json();
         this.accessToken = result.access_token;
+        window.localStorage.setItem('token', this.accessToken)
         return result;
     }
 
