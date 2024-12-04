@@ -1,16 +1,83 @@
 async function onLoginSuccess() {
     $(".hide-after-login").hide();
     const me = await $.apiClient.getMe()
-    $("#login-feedback").html(`<div class="alert alert-success">Welcome <b>${me.username}</b></div>`);
+    $("#login-feedback").html(`<div class="alert alert-success">Ciao, <b>${me.username}</b><div id="total-net-worth"></div></div>`);
 
     const accounts = await $.apiClient.listAccounts()
     accounts.forEach(account => {
         $.accounts[account._id] =  account
     })
 
-    fetchNetCash()
-    fetchStockAssets()
+    await fetchNetCash()
+    await fetchStockAssets()
+    
     $(".show-after-login").show()
+}
+
+
+function updateTotalNetWorth() {
+    let totalNet = 0
+    for(let k in $.accounts) {
+        if("total" in $.accounts[k])
+            totalNet += parseFloat($.accounts[k].total)
+    }
+
+    let totalStocks = 0
+    for(let key in $.stocks) {
+        stock = $.stocks[key]
+        current_value = ("current_value" in stock)? parseFloat(stock.current_value): 0
+        totalStocks+=current_value
+    }    
+
+    totalNetWorth = totalNet+totalStocks
+    $("#total-net-worth").text("Patrimonio attuale: "+totalNetWorth.toFixed(2)+" €")
+}
+
+function updateAccountTable() {
+    $.accountsTable.clear()
+    for(let key in $.accounts) {
+        account = $.accounts[key]
+        if("total" in account) {
+            $.accountsTable.row.add([
+                account.name,
+                account.total.toFixed(2)+" €",
+                account.asset_type,
+            ])
+        }
+    }
+    $.accountsTable.draw()
+}
+
+function updateStocksTable() {
+    $.stocksTable.clear();
+    for(let key in $.stocks) {
+        stock = $.stocks[key]
+        current_value = ("current_value" in stock)? parseFloat(stock.current_value): null
+        price = ("price" in stock)? parseFloat(stock.price): null
+        current_yield = 0
+        if(current_value) {
+            current_value = current_value.toFixed(2)+"  €"
+            price = price.toFixed(2)+"  €"
+            current_yield = ($.stocks[stock._id].current_value/stock.total_wfee - 1)*100
+            direction = (current_yield>=0)?"+":"-"
+            current_yield = direction+current_yield.toFixed(2)+"%"
+
+        }         
+        $.stocksTable.row.add([
+            stock._id,
+            stock.quantity,
+            stock.total_wfee,
+            price,current_value, current_yield
+        ])
+    }
+    $.stocksTable.draw();    
+
+}
+
+function refresh() {
+    updateAccountTable()
+    updateStocksTable()
+    updateTotalNetWorth()
 }
 
 
@@ -31,10 +98,13 @@ async function fetchNetCash() {
     cashNet.forEach(accountNet => {
         if(accountNet._id in $.accounts) {
             const account = $.accounts[accountNet._id]
-            $("#account-list").append(`<li>${account.name}: ${accountNet.total.toFixed(2)} €</li>`)
+            $.accounts[accountNet._id].total = accountNet.total
         }
     })
+    refresh()
 }
+
+
 
 async function fetchStockAssets() {
     const today = new Date();
@@ -43,16 +113,15 @@ async function fetchStockAssets() {
     stockAssets.forEach(stock => {
         $.stocks[stock._id] = stock
         stock_id = stock._id.replace(".","")
-        $("#stocks-list").append(`<li id="${stock_id}">${stock._id}: ${stock.quantity}, ${stock.total_wfee}  €`)
         $.apiClient.getTickerPrice(stock._id).then(data => {
             data.price = data.price.toFixed(1)
             $.stocks[stock._id].price = data.price
-            current_value = data.price*$.stocks[stock._id].quantity
-            current_yield = (current_value/stock.total_wfee - 1)*100
-            direction = (current_yield>=0)?"+":"-"
-            $(`#${data.ticker.replace(".","")}`).append(`, <em>${data.price}  €</em><b> ${current_value.toFixed(2)} € (${direction}${current_yield.toFixed(2)}%)</b>`)
+            $.stocks[stock._id].current_value = data.price*$.stocks[stock._id].quantity
+
+            refresh()
         })
     })
+    refresh()
 }
 
 

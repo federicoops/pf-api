@@ -18,7 +18,7 @@
         
         <!-- Authentication Section -->
         <div id="auth-section">
-            <h2 class="hide-after-login">Login</h2>
+            <h4 class="hide-after-login">Login</h4>
             <form id="login-form" class="hide-after-login">
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
@@ -35,10 +35,19 @@
 
         <!-- Accounts Section -->
         <div id="accounts-section" class="show-after-login">
-            <h2>Liquidity/Short term</h2>
-            <ul id="account-list">
-
-            </ul>
+            <h4>Liquiditá/Breve termine</h4>
+            <div class="mt-3">
+                <table id="accounts-table" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Conto</th>
+                            <th>Disponibile</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
             <hr>
         </div>
 
@@ -47,10 +56,22 @@
 
         <!-- Stocks Section -->
         <div id="stocks-section" class="show-after-login">
-            <h2>Stocks/ETF</h2>
-            <ul id="stocks-list">
-                
-            </ul>
+            <h4>Azioni/ETF</h4>
+            <div class="mt-3">
+                <table id="stocks-table" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Ticker</th>
+                            <th>Quote</th>
+                            <th>Costo</th>
+                            <th>Prezzo corr.</th>
+                            <th>Controvalore</th>
+                            <th>Yield</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
             <hr>
         </div>        
 
@@ -58,7 +79,8 @@
 
         <!-- Transactions Section -->
         <div id="transactions-section" class="show-after-login">
-            <h2>Transactions</h2>
+            <h4>Movimenti</h4>
+            <br>
             <input type="date" id="tr-start" name="tr-start" />
             <input type="date" id="tr-end" name="tr-end"/>
 
@@ -81,25 +103,44 @@
     </div>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(async function () {
             $(".show-after-login").hide()
             const host = window.location.protocol + "//" + window.location.host;
             $.apiClient = new ApiClient(`${host}`);
 
-            // Initialize DataTable
+            const simpleTable = {
+                "bPaginate": false,
+                "bLengthChange": false,
+                "bFilter": false,
+                "bInfo": false,
+                "bAutoWidth": false,
+                order: [[1, 'desc']]
+            }
+
+            // Initialize DataTables
             $.transactionsTable = $("#transactions-table").DataTable({
                 order: [[1, 'desc']]
             });
             
+            $.stocksTable = $("#stocks-table").DataTable(simpleTable);
+            $.accountsTable = $("#accounts-table").DataTable(simpleTable);
+
             // APPLICATION DATA STATUS STORE
             $.accounts = {}
             $.stocks = {}
             $.transactions = {}
             // -----------------------------
 
-            // Check for session token in storage
-            if($.apiClient.isLogged())
-                onLoginSuccess()
+            // Check for session token in storage and check for token validity
+            if($.apiClient.isLogged()) {
+                try {
+                    const me = await $.apiClient.getMe()
+                    onLoginSuccess()
+                } catch (error) {
+                    $.apiClient.accessToken = null
+                    window.localStorage.removeItem('token')
+                }
+            }
             
                 // Login form submission
             $("#login-form").on("submit", async function (e) {
