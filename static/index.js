@@ -34,6 +34,7 @@ function updateTotalNetWorth() {
 }
 
 function updateAccountTable() {
+    if(!$.accountsTable) return
     $.accountsTable.clear()
     for(let key in $.accounts) {
         account = $.accounts[key]
@@ -49,6 +50,7 @@ function updateAccountTable() {
 }
 
 function updateStocksTable() {
+    if(!$.stocksTable) return
     $.stocksTable.clear();
     for(let key in $.stocks) {
         stock = $.stocks[key]
@@ -59,7 +61,7 @@ function updateStocksTable() {
             current_value = current_value.toFixed(2)+"  €"
             price = price.toFixed(2)+"  €"
             current_yield = ($.stocks[stock._id].current_value/stock.total_wfee - 1)*100
-            direction = (current_yield>=0)?"+":"-"
+            direction = (current_yield>=0)?"+":""
             current_yield = direction+current_yield.toFixed(2)+"%"
 
         }         
@@ -114,7 +116,6 @@ async function fetchStockAssets() {
         $.stocks[stock._id] = stock
         stock_id = stock._id.replace(".","")
         $.apiClient.getTickerPrice(stock._id).then(data => {
-            data.price = data.price.toFixed(1)
             $.stocks[stock._id].price = data.price
             $.stocks[stock._id].current_value = data.price*$.stocks[stock._id].quantity
 
@@ -145,4 +146,44 @@ async function onTransactionFetched(transactions) {
 
     // Redraw the table
     $.transactionsTable.draw();    
+}
+
+
+async function boot() {
+    const host = window.location.protocol + "//" + window.location.host;
+    $.apiClient = new ApiClient(`${host}`);
+    // APPLICATION DATA STATUS STORE
+    $.accounts = {}
+    $.stocks = {}
+    $.transactions = {}
+    // -----------------------------
+    
+    // Check for session token in storage and check for token validity
+    if($.apiClient.isLogged()) {
+        try {
+            const me = await $.apiClient.getMe()
+            await onLoginSuccess()
+        } catch (error) {
+            $.apiClient.accessToken = null
+            window.localStorage.removeItem('token')
+            const currentUrl = window.location.href;
+            const newUrl = currentUrl.replace(/new\.html$/, '');
+            window.location.replace(newUrl);
+        }
+    } else {
+        const currentUrl = window.location.href;
+        const newUrl = currentUrl.replace(/new\.html$/, '');
+        window.location.replace(newUrl);
+    }
+}
+
+// Function to populate account dropdown
+function populateAccountDropdown(selectId) {
+    const dropdown = $(`#${selectId}`);
+    dropdown.empty(); // Clear existing options
+    dropdown.append('<option value="" disabled selected>Select an account</option>'); // Default option
+    for(v in $.accounts) {
+        account = $.accounts[v]
+        dropdown.append(`<option value="${v}">${account.name}</option>`);
+    };
 }

@@ -65,9 +65,11 @@ async def find_transaction(id: str, request: Request, current_user: Annotated[Us
 
 @router.post("/", response_model=Transaction)
 async def add_transactions(request: Request,current_user: Annotated[User, Depends(get_current_active_user)], transaction: TransactionCreate = Body(...)):
-    transaction = transaction.model_dump()
-    new_tr = request.app.db["transactions"].insert_one(transaction)
+    transaction = {k: v for k, v in transaction.dict().items() if v is not None}
+    print(transaction)
+
     
+    new_tr = request.app.db["transactions"].insert_one(transaction)
     inserted_tr = request.app.db["transactions"].find_one({"_id": new_tr.inserted_id})
     return inserted_tr
 

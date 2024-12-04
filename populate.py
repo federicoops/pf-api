@@ -118,7 +118,8 @@ pipeline = [
     }
 ]
 
-transactions = list(db["transactions"].aggregate(pipeline))
+transactions = list(db["transactions"].find())
 
 for t in transactions:
     print(t)
+

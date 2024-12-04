@@ -31,15 +31,19 @@
                 <form id="basic-transaction-form">
                     <div class="mb-3">
                         <label for="basic-date" class="form-label">Date</label>
-                        <input type="date" class="form-control" id="basic-date" required>
+                        <input type="date"  class="form-control" id="basic-date" required>
                     </div>
+                    <div class="mb-3">
+                        <label for="basic-description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="basic-description">
+                    </div>                    
                     <div class="mb-3">
                         <label for="basic-category" class="form-label">Category</label>
                         <input type="text" class="form-control" id="basic-category" required>
                     </div>
                     <div class="mb-3">
                         <label for="basic-amount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="basic-amount" required>
+                        <input type="number" step="any" class="form-control" id="basic-amount" required>
                     </div>
                     <div class="mb-3">
                         <label for="basic-account" class="form-label">Account</label>
@@ -59,12 +63,12 @@
                         <input type="date" class="form-control" id="investment-date" required>
                     </div>
                     <div class="mb-3">
-                        <label for="investment-category" class="form-label">Category</label>
-                        <input type="text" class="form-control" id="investment-category" required>
-                    </div>
+                        <label for="investment-description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="investment-description">
+                    </div>                          
                     <div class="mb-3">
                         <label for="investment-amount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="investment-amount" required>
+                        <input type="number" step="any" class="form-control" id="investment-amount" required>
                     </div>
                     <div class="mb-3">
                         <label for="investment-account" class="form-label">Account</label>
@@ -73,16 +77,20 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="investment-ticker" class="form-label">Ticker</label>
-                        <input type="text" class="form-control" id="investment-ticker" required>
+                        <label for="investment-ticker"  class="form-label">Ticker</label>
+                        <input type="text" class="form-control" onchange="updatePrice();" id="investment-ticker" required>
                     </div>
                     <div class="mb-3">
                         <label for="investment-quantity" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="investment-quantity" required>
+                        <input type="number" step="any" onchange="updateAmountInv();" class="form-control" id="investment-quantity" required>
                     </div>
                     <div class="mb-3">
                         <label for="investment-price" class="form-label">Price</label>
-                        <input type="number" class="form-control" id="investment-price" required>
+                        <input type="number" step="any" onchange="updateAmountInv();" class="form-control" id="investment-price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="investment-fee" class="form-label">Fee</label>
+                        <input type="number" step="any" placeholder="0,0" onchange="updateAmountInv();" class="form-control" id="investment-fee" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
@@ -96,17 +104,21 @@
                         <input type="date" class="form-control" id="transfer-date" required>
                     </div>
                     <div class="mb-3">
+                        <label for="transfer-description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="transfer-description">
+                    </div>                      
+                    <div class="mb-3">
                         <label for="transfer-amount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="transfer-amount" required>
+                        <input type="number" step="any" class="form-control" id="transfer-amount" required>
                     </div>
                     <div class="mb-3">
-                        <label for="transfer-from-account" class="form-label">Account</label>
+                        <label for="transfer-from-account" class="form-label">From</label>
                         <select class="form-select" id="transfer-from-account" required>
                             <option value="" disabled selected>Select an account</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="transfer-to-account" class="form-label">Account</label>
+                        <label for="transfer-to-account" class="form-label">To</label>
                         <select class="form-select" id="transfer-to-account" required>
                             <option value="" disabled selected>Select an account</option>
                         </select>
@@ -122,6 +134,23 @@
     <script src="apiclient.js"></script>
 
     <script>
+
+        function updateAmountInv() {
+            price = $("#investment-price").val()
+            quantity = $("#investment-quantity").val()
+            fee = parseFloat($("#investment-fee").val())
+            if(isNaN(fee)) fee = 0
+            total = price*quantity + fee
+            $("#investment-amount").val(total)
+        }        
+
+        function updatePrice() {
+            console.log("called")
+            $.apiClient.getTickerPrice($("#investment-ticker").val()).then(response => {
+                $("#investment-price").val(response.price.toFixed(2))
+            })
+        }
+
         $(document).ready(async function () {
             await boot()
 
@@ -138,45 +167,81 @@
 
 
             // Basic Transaction form submission
-            $("#basic-transaction-form").on("submit", function (e) {
+            $("#basic-transaction-form").on("submit", async function (e) {
                 e.preventDefault();
                 const data = {
                     date: $("#basic-date").val(),
                     category: $("#basic-category").val(),
                     amount: $("#basic-amount").val(),
-                    account: $("#basic-account").val(),
+                    account: $("#basic-account :selected").val(),
+                    description: $("#basic-description").val()
                 };
-                console.log("Basic Transaction Submitted:", data);
-                alert("Basic transaction submitted successfully!");
+                try {
+                    await $.apiClient.addTransaction(data)
+                } catch (error) {
+                    alert(error.message)
+                }
+
             });
 
             // Investment Transaction form submission
-            $("#investment-transaction-form").on("submit", function (e) {
+            $("#investment-transaction-form").on("submit", async function (e) {
                 e.preventDefault();
-                const data = {
+                const buy = {
                     date: $("#investment-date").val(),
-                    category: $("#investment-category").val(),
+                    category: "Investimento",
                     amount: $("#investment-amount").val(),
                     account: $("#investment-account").val(),
                     ticker: $("#investment-ticker").val(),
                     quantity: $("#investment-quantity").val(),
                     price: $("#investment-price").val(),
+                    description: $("#investment-description").val()
                 };
-                console.log("Investment Transaction Submitted:", data);
-                alert("Investment transaction submitted successfully!");
+
+                const liquidity = {
+                    date: $("#investment-date").val(),
+                    category: "Investimento",
+                    amount: -$("#investment-amount").val(),
+                    description: $("#investment-description").val(),
+                    account: $("#investment-account").val(),
+                }
+
+                try {
+                    await $.apiClient.addTransaction(buy)
+                    await $.apiClient.addTransaction(liquidity)
+                } catch (error) {
+                    alert(error.message)
+                }
             });
 
+            
+
+            
+
             // Transfer Transaction form submission
-            $("#transfer-transaction-form").on("submit", function (e) {
+            $("#transfer-transaction-form").on("submit",async function (e) {
                 e.preventDefault();
-                const data = {
+                const from = {
                     date: $("#transfer-date").val(),
-                    amount: $("#transfer-amount").val(),
-                    fromAccount: $("#transfer-from-account").val(),
-                    toAccount: $("#transfer-to-account").val(),
+                    category: "Trasferimento",
+                    amount: -$("#transfer-amount").val(),
+                    account: $("#transfer-from-account :selected").val(),
+                    description: $("#transfer-description").val()
                 };
-                console.log("Transfer Transaction Submitted:", data);
-                alert("Transfer transaction submitted successfully!");
+                const to = {
+                    date: $("#transfer-date").val(),
+                    category: "Trasferimento",
+                    amount: $("#transfer-amount").val(),
+                    account: $("#transfer-to-account :selected").val(),
+                    description: $("#transfer-description").val()
+                };
+
+                try {
+                    await $.apiClient.addTransaction(from)
+                    await $.apiClient.addTransaction(to)
+                } catch (error) {
+                    alert(error.message)
+                }
             });
         });
     </script>
