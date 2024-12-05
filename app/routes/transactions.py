@@ -7,6 +7,10 @@ from typing import Annotated
 from app.model.auth import User
 from app.routes.auth import get_current_active_user
 from bson import ObjectId
+from fastapi.responses import StreamingResponse
+import csv
+from io import StringIO
+
 
 router = APIRouter(prefix="/api/transactions")
 
@@ -55,6 +59,37 @@ async def list_transactions(
 
     transactions = list(request.app.db["transactions"].aggregate(pipeline))
     return transactions
+
+@router.get("/dump")
+async def dump_transactions(
+    request: Request, 
+    current_user: Annotated[User, Depends(get_current_active_user)]  
+):
+    # Fetch accounts to create an account map
+    accounts = list(request.app.db["accounts"].find())
+    account_map = {}
+    for account in accounts:
+        account_map[account._id] = account
+
+    # Fetch all transactions, do not project transaction._id
+    transactions = list(request.app.db["transactions"].find({},{"_id":0}))
+
+    # Use transactions[0] keys to build CSV header
+    csv_buffer = StringIO()
+    csv_writer = csv.DictWriter(csv_buffer, fieldnames=transactions[0].keys())
+
+    # Iterate transactions, substitute account id with account name using the account map and write to csv
+    for transaction in transactions:
+        transaction.account = account_map[transaction.account].name
+        csv_writer.writerow(transaction)
+
+    # Serve file
+    csv_buffer.seek(0)
+    return StreamingResponse(
+        csv_buffer,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=transactions.csv"}
+    )
 
 @router.get("/{id}", response_model=Transaction)
 async def find_transaction(id: str, request: Request, current_user: Annotated[User, Depends(get_current_active_user)]):

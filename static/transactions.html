@@ -106,16 +106,6 @@
         $(document).ready(async function () {
             await boot()
 
-
-            async function onFilterClicked(start_date=null, end_date=null) {
-                if(!start_date) start_date = getStartOfTime()
-                if(!end_date) end_date = getToday()
-                console.log(start_date, end_date)
-                const transactions = await $.apiClient.listTransactions(start_date, end_date);
-                onTransactionFetched(transactions)
-            }
-
-
             $.transactionsTable = $('#transactions-table').DataTable({
                 columns: [
                     { data: 'id', visible: false }, // Hidden ID column
@@ -156,8 +146,6 @@
                 }
             });
 
-
-
             // List transactions
             $("#list-transactions").on("click", async function () {
                 try {
@@ -168,8 +156,6 @@
                     alert(`Failed to fetch transactions: ${error.message}`);
                 }
             });            
-
-
 
             // Handle edit button click
             $('#transactions-table tbody').on('click', '.edit-btn', function () {
