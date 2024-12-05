@@ -17,8 +17,8 @@ router = APIRouter(prefix="/api/transactions")
 
 @router.get("/", response_model=List[Transaction])
 async def list_transactions(
-    request: Request, current_user: Annotated[User, Depends(get_current_active_user)], 
-    start_date: datetime = datetime.today().replace(day=1), 
+    request: Request, current_user: Annotated[User, Depends(get_current_active_user)],
+    start_date: datetime = datetime.today().replace(day=1),
     end_date: datetime = datetime.today()):
 
     pipeline = [
@@ -30,18 +30,18 @@ async def list_transactions(
     return transactions
 
 @router.get("/aggregate", response_model=List[TransactionAggregate])
-async def list_transactions(
-    request: Request, 
-    current_user: Annotated[User, Depends(get_current_active_user)], 
-    start_date: datetime = datetime.today().replace(day=1), 
+async def aggregate_transactions(
+    request: Request,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    start_date: datetime = datetime.today().replace(day=1),
     end_date: datetime = datetime.today(),
-    aggregate: str = None):
+    aggregate: str = ""):
 
     if aggregate is None or aggregate not in ["ticker", "category", "account"]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Aggregation group not specified or invalid")
-       
+
     if aggregate != "ticker":
-            
+
         pipeline = [
             {"$match": {"date": {"$gte": start_date, "$lte": end_date}, "price":{"$exists": False}}},  # Filter by date range, exclude etf/stocks buying
             {"$group": {"_id": f"${aggregate}", "total": {"$sum": "$amount"}}}
@@ -52,7 +52,7 @@ async def list_transactions(
             {"$group": {"_id": "$ticker",
                         "quantity": {"$sum": "$quantity"},
                         "total_wfee": {"$sum": "$amount"} ,
-                        "total":{ "$sum": { "$multiply": [ "$price", "$quantity" ] }} 
+                        "total":{ "$sum": { "$multiply": [ "$price", "$quantity" ] }}
                     }
             }
         ]
@@ -62,25 +62,26 @@ async def list_transactions(
 
 @router.get("/dump")
 async def dump_transactions(
-    request: Request, 
-    current_user: Annotated[User, Depends(get_current_active_user)]  
+    request: Request,
+    current_user: Annotated[User, Depends(get_current_active_user)]
 ):
     # Fetch accounts to create an account map
     accounts = list(request.app.db["accounts"].find())
     account_map = {}
     for account in accounts:
-        account_map[account._id] = account
+        account_map[str(account["_id"])] = account
 
     # Fetch all transactions, do not project transaction._id
     transactions = list(request.app.db["transactions"].find({},{"_id":0}))
 
     # Use transactions[0] keys to build CSV header
     csv_buffer = StringIO()
-    csv_writer = csv.DictWriter(csv_buffer, fieldnames=transactions[0].keys())
-
+    tk = TransactionUpdate()
+    csv_writer = csv.DictWriter(csv_buffer, fieldnames=tk.dict().keys())
+    csv_writer.writeheader()
     # Iterate transactions, substitute account id with account name using the account map and write to csv
     for transaction in transactions:
-        transaction.account = account_map[transaction.account].name
+        transaction["account"] = account_map[transaction["account"]]["name"]
         csv_writer.writerow(transaction)
 
     # Serve file
@@ -102,7 +103,7 @@ async def find_transaction(id: str, request: Request, current_user: Annotated[Us
 async def add_transactions(request: Request,current_user: Annotated[User, Depends(get_current_active_user)], transaction: TransactionCreate = Body(...)):
     transaction = {k: v for k, v in transaction.dict().items() if v is not None}
 
-    
+
     new_tr = request.app.db["transactions"].insert_one(transaction)
     inserted_tr = request.app.db["transactions"].find_one({"_id": new_tr.inserted_id})
     return inserted_tr
