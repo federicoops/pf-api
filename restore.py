@@ -88,5 +88,42 @@ def populate():
         inserted = db["transactions"].insert_one(tx)
         print(f"Inserted transaction {inserted.inserted_id}")
 
-populate_user()
-populate()
+#populate_user()
+#populate()
+
+
+mongo_client = MongoClient(MONGO_URI)
+db = mongo_client[MONGO_DB]
+
+pipeline = [
+    {
+        "$match": {
+            "date": {
+                "$gte": datetime(2024, 1, 1),
+                "$lt": datetime(2024 + 1, 1, 1),
+            },
+            "amount": {"$lt": 0}
+
+        }
+    },
+    {
+        "$group": {
+            "_id": {
+                "month": {"$month": "$date"},
+                "category": "$category"
+            },
+            "totalAmount": {"$sum": "$amount"}
+        }
+    },
+    {
+        "$sort": {
+            "_id.month": 1,
+            "_id.category": 1
+        }
+    }
+]
+
+result = list(db["transactions"].aggregate(pipeline))
+
+for r in result:
+    print(r,end=",\n")
