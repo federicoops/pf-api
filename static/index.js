@@ -135,13 +135,15 @@ async function onTransactionFetched(transactions) {
         $.transactions[transaction._id] = transaction
         const account = $.accounts[transaction.account]
         const date = new Date(transaction.date)
-        $.transactionsTable.row.add([
-            `${transaction.amount} €`,
-            date.toISOString().split('T')[0],
-            transaction.category,
-            account.name,                    
-            transaction.description || "N/A",
-        ]);
+        $.transactionsTable.row.add({
+            'id':transaction._id,
+            'amount':`${transaction.amount} €`,
+            'date':date.toISOString().split('T')[0],
+            'category':transaction.category,
+            'account':account.name,
+            'accountid':transaction.account,               
+            'description':transaction.description || "N/A",
+        });
     });
 
     // Redraw the table
@@ -167,7 +169,7 @@ async function boot() {
             $.apiClient.accessToken = null
             window.localStorage.removeItem('token')
             const currentUrl = window.location.href;
-            const newUrl = currentUrl.replace(/new\.html$/, '');
+            const newUrl = currentUrl.replace(/\/[^/]+\.html$/, '/');
             window.location.replace(newUrl);
         }
     } else {
@@ -186,4 +188,15 @@ function populateAccountDropdown(selectId) {
         account = $.accounts[v]
         dropdown.append(`<option value="${v}">${account.name}</option>`);
     };
+}
+
+function getToday() {
+    today = new Date();
+    today.setDate(today.getDate()+1)
+    return today.toISOString().split('T')[0];
+}
+
+function getStartOfTime() {
+    const startOfTime = new Date(1900, 0, 2);
+    return startOfTime.toISOString().split('T')[0];
 }

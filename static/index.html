@@ -31,7 +31,9 @@
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
             <div id="login-feedback" class="mt-3"></div>
-            <a href="./new.html"  class="btn btn-secondary show-after-login">Nuovo movimento</a>
+            <a href="./new.html"  class="btn btn-primary show-after-login">Nuovo movimento</a>
+            <a href="./transactions.html"  class="btn btn-success show-after-login">Tutti i movimenti</a>
+
         </div>
 
         <hr>
@@ -80,29 +82,7 @@
 
        
 
-        <!-- Transactions Section -->
-        <div id="transactions-section" class="show-after-login">
-            <h4>Movimenti</h4>
-            <br>
-            <input type="date" id="tr-start" name="tr-start" />
-            <input type="date" id="tr-end" name="tr-end"/>
 
-            <button id="list-transactions" class="btn btn-secondary">Filtra</button>
-            <div class="mt-3">
-                <table id="transactions-table" class="display" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Importo</th>
-                            <th>Data</th>
-                            <th>Categoria</th>
-                            <th>Conto</th>
-                            <th>Descrizione</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -120,10 +100,6 @@
                 order: [[1, 'desc']]
             }
 
-            // Initialize DataTables
-            $.transactionsTable = $("#transactions-table").DataTable({
-                order: [[1, 'desc']]
-            });
             
             $.stocksTable = $("#stocks-table").DataTable(simpleTable);
             $.accountsTable = $("#accounts-table").DataTable(simpleTable);
@@ -160,18 +136,7 @@
                 }
             });
 
-            // List transactions
-            $("#list-transactions").on("click", async function () {
-                try {
-                    let start_date = $("#tr-start").val()
-                    let end_date = $("#tr-end").val()
-                    
-                    const transactions = await $.apiClient.listTransactions(start_date, end_date);
-                    onTransactionFetched(transactions)
-                } catch (error) {
-                    alert(`Failed to fetch transactions: ${error.message}`);
-                }
-            });
+
         });
     </script>
 </body>

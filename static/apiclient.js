@@ -34,6 +34,7 @@ class ApiClient {
             headers,
         };
 
+
         if (data) {
             options.body = JSON.stringify(data);
         }
@@ -43,7 +44,8 @@ class ApiClient {
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
-
+        
+        if(response.status == 204) return {} // http 204 no content
         return response.json();
     }
 
@@ -64,7 +66,6 @@ class ApiClient {
         if (!response.ok) {
             throw new Error("Login failed");
         }
-
         const result = await response.json();
         this.accessToken = result.access_token;
         window.localStorage.setItem('token', this.accessToken)
