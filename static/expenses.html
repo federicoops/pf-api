@@ -45,7 +45,7 @@
                             <button type="submit" class="btn btn-success">Salva</button>
                         </form>
     
-                        <div class="alert alert-secondary" id="netSavings">
+                        <div class="alert alert-primary" id="netSavings">
                             Risparmio questo mese: <b style="color:goldenrod" id="netSavingsAmount">0</b><br>
                             Spese questo mese: <b style="color:red"id="totalExpenses">0</b><br>
 
@@ -138,7 +138,7 @@
     // Add total row
     const tbody = $("#transactionsTable tbody");
 
-    const totalRow = `<tr class="table-secondary">
+    const totalRow = `<tr class="table-primary">
         <td><strong>Totale</strong></td>
         ${monthlyTotals.map(total => `<td class="text-right"><strong>${total.toFixed(2)+" €"}</strong></td>`).join('')}
     </tr>`;

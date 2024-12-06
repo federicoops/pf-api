@@ -22,12 +22,11 @@ docker run -d `
 docker build -t pf-api .
 
 # Step 5: Run the pf-api container
-docker run -d `
+docker run `
   --rm `
   --name pf-api `
   --network pf-network `
   -p 8000:8000 `
-  -v "${PWD}/static:/pfapi/static/" `
-  -e MONGO_URI=mongodb://root:example@pf-db:27017 `
-  -e MONGO_DB=pf-api `
+  -v "${PWD}\static:/pfapi/static/" `
+  -v "${PWD}\env:/pfapi/env/" `
   pf-api
