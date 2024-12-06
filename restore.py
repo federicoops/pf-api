@@ -9,8 +9,10 @@ from passlib.context import CryptContext
 from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
 
-MONGO_URI = "mongodb://root:example@localhost:27017"
-MONGO_DB  = "pf-api"
+from dotenv import dotenv_values
+config = dotenv_values("./env/.env")
+MONGO_URI=config["MONGO_URI"]
+MONGO_DB=config["MONGO_DB"]
 
 def populate_user():
     username="federico"
