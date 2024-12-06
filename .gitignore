@@ -1,3 +1,4 @@
 pfapi/
 **/__pycache__/
 *.csv
+.DS_Store
