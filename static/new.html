@@ -9,20 +9,20 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1>New Transaction</h1>
+        <h5>Nuovo movimento</h5>
         <div id="login-feedback" class="mt-3"></div>
         <a href="./"  class="btn btn-secondary show-after-login">Home</a>
         <hr>
         <!-- Tabs for selecting transaction type -->
         <ul class="nav nav-tabs" id="transactionTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic-transaction" type="button" role="tab">Basic</button>
+                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic-transaction" type="button" role="tab">Spesa/Guadagno</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="investment-tab" data-bs-toggle="tab" data-bs-target="#investment-transaction" type="button" role="tab">Investment</button>
+                <button class="nav-link" id="investment-tab" data-bs-toggle="tab" data-bs-target="#investment-transaction" type="button" role="tab">Investimento</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="transfer-tab" data-bs-toggle="tab" data-bs-target="#transfer-transaction" type="button" role="tab">Transfer</button>
+                <button class="nav-link" id="transfer-tab" data-bs-toggle="tab" data-bs-target="#transfer-transaction" type="button" role="tab">Trasferimento</button>
             </li>
         </ul>
 
@@ -32,28 +32,30 @@
             <div class="tab-pane fade show active" id="basic-transaction" role="tabpanel">
                 <form id="basic-transaction-form">
                     <div class="mb-3">
-                        <label for="basic-date" class="form-label">Date</label>
+                        <label for="basic-date" class="form-label">Data</label>
                         <input type="date"  class="form-control" id="basic-date" required>
                     </div>
                     <div class="mb-3">
-                        <label for="basic-description" class="form-label">Description</label>
+                        <label for="basic-description" class="form-label">Descrizione</label>
                         <input type="text" class="form-control" id="basic-description">
                     </div>                    
                     <div class="mb-3">
-                        <label for="basic-category" class="form-label">Category</label>
-                        <input type="text" class="form-control" id="basic-category" required>
+                        <label for="basic-category" class="form-label">Categoria</label>
+                        <select class="form-control form-category" id="basic-category" required>
+                            <option value="" disabled selected>Scegli categoria</option>
+                        </select>
                     </div>
                     <div class="mb-3">
-                        <label for="basic-amount" class="form-label">Amount</label>
+                        <label for="basic-amount" class="form-label">Importo</label>
                         <input type="number" step="any" class="form-control" id="basic-amount" required>
                     </div>
                     <div class="mb-3">
-                        <label for="basic-account" class="form-label">Account</label>
+                        <label for="basic-account" class="form-label">Conto</label>
                         <select class="form-select" id="basic-account" required>
-                            <option value="" disabled selected>Select an account</option>
+                            <option value="" disabled selected>Scegli conto</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary">Aggiungi</button>
                 </form>
             </div>
 
@@ -61,21 +63,21 @@
             <div class="tab-pane fade" id="investment-transaction" role="tabpanel">
                 <form id="investment-transaction-form">
                     <div class="mb-3">
-                        <label for="investment-date" class="form-label">Date</label>
+                        <label for="investment-date" class="form-label">Data</label>
                         <input type="date" class="form-control" id="investment-date" required>
                     </div>
                     <div class="mb-3">
-                        <label for="investment-description" class="form-label">Description</label>
+                        <label for="investment-description" class="form-label">Descrizione</label>
                         <input type="text" class="form-control" id="investment-description">
                     </div>                          
                     <div class="mb-3">
-                        <label for="investment-amount" class="form-label">Amount</label>
+                        <label for="investment-amount" class="form-label">Importo</label>
                         <input type="number" step="any" class="form-control" id="investment-amount" required>
                     </div>
                     <div class="mb-3">
-                        <label for="investment-account" class="form-label">Account</label>
+                        <label for="investment-account" class="form-label">Conto</label>
                         <select class="form-select" id="investment-account" required>
-                            <option value="" disabled selected>Select an account</option>
+                            <option value="" disabled selected>Seleziona conto</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -83,18 +85,18 @@
                         <input type="text" class="form-control" onchange="updatePrice();" id="investment-ticker" required>
                     </div>
                     <div class="mb-3">
-                        <label for="investment-quantity" class="form-label">Quantity</label>
+                        <label for="investment-quantity" class="form-label">Quote</label>
                         <input type="number" step="any" onchange="updateAmountInv();" class="form-control" id="investment-quantity" required>
                     </div>
                     <div class="mb-3">
-                        <label for="investment-price" class="form-label">Price</label>
+                        <label for="investment-price" class="form-label">Prezzo</label>
                         <input type="number" step="any" onchange="updateAmountInv();" class="form-control" id="investment-price" required>
                     </div>
                     <div class="mb-3">
                         <label for="investment-fee" class="form-label">Fee</label>
                         <input type="number" step="any" placeholder="0,0" onchange="updateAmountInv();" class="form-control" id="investment-fee" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary">Aggiungi</button>
                 </form>
             </div>
 
@@ -102,30 +104,30 @@
             <div class="tab-pane fade" id="transfer-transaction" role="tabpanel">
                 <form id="transfer-transaction-form">
                     <div class="mb-3">
-                        <label for="transfer-date" class="form-label">Date</label>
+                        <label for="transfer-date" class="form-label">Data</label>
                         <input type="date" class="form-control" id="transfer-date" required>
                     </div>
                     <div class="mb-3">
-                        <label for="transfer-description" class="form-label">Description</label>
+                        <label for="transfer-description" class="form-label">Descrizione</label>
                         <input type="text" class="form-control" id="transfer-description">
                     </div>                      
                     <div class="mb-3">
-                        <label for="transfer-amount" class="form-label">Amount</label>
+                        <label for="transfer-amount" class="form-label">Importo</label>
                         <input type="number" step="any" class="form-control" id="transfer-amount" required>
                     </div>
                     <div class="mb-3">
-                        <label for="transfer-from-account" class="form-label">From</label>
+                        <label for="transfer-from-account" class="form-label">Conto partenza</label>
                         <select class="form-select" id="transfer-from-account" required>
-                            <option value="" disabled selected>Select an account</option>
+                            <option value="" disabled selected>Seleziona conto</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="transfer-to-account" class="form-label">To</label>
+                        <label for="transfer-to-account" class="form-label">Conto destinazione</label>
                         <select class="form-select" id="transfer-to-account" required>
-                            <option value="" disabled selected>Select an account</option>
+                            <option value="" disabled selected>Seleziona conto</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary">Aggiungi</button>
                 </form>
             </div>
         </div>
@@ -153,6 +155,8 @@
             })
         }
 
+
+
         $(document).ready(async function () {
             await boot()
 
@@ -166,13 +170,17 @@
             populateAccountDropdown("investment-account");
             populateAccountDropdown("transfer-to-account");
             populateAccountDropdown("transfer-from-account");
-
+            populateCategoryDropDowns("form-category")
 
             // Basic Transaction form submission
             $("#basic-transaction-form").on("submit", async function (e) {
                 e.preventDefault();
+                let btn = $(this).closest('form').find(':submit');
+                btn.text("...")
+                let date = new Date($("#basic-date").val());
+                date.setDate(date.getDate() + 1);
                 const data = {
-                    date: $("#basic-date").val(),
+                    date: date,
                     category: $("#basic-category").val(),
                     amount: $("#basic-amount").val(),
                     account: $("#basic-account :selected").val(),
@@ -180,6 +188,7 @@
                 };
                 try {
                     await $.apiClient.addTransaction(data)
+                    displaySuccess(btn)
                 } catch (error) {
                     alert(error.message)
                 }
@@ -189,8 +198,12 @@
             // Investment Transaction form submission
             $("#investment-transaction-form").on("submit", async function (e) {
                 e.preventDefault();
+                let btn = $(this).closest('form').find(':submit');
+                btn.text("...")
+                let date = new Date($("#investment-date").val());
+                date.setDate(date.getDate() + 1);
                 const buy = {
-                    date: $("#investment-date").val(),
+                    date: date,
                     category: "Investimento",
                     amount: $("#investment-amount").val(),
                     account: $("#investment-account").val(),
@@ -201,7 +214,7 @@
                 };
 
                 const liquidity = {
-                    date: $("#investment-date").val(),
+                    date: date,
                     category: "Investimento",
                     amount: -$("#investment-amount").val(),
                     description: $("#investment-description").val(),
@@ -211,27 +224,44 @@
                 try {
                     await $.apiClient.addTransaction(buy)
                     await $.apiClient.addTransaction(liquidity)
+                    displaySuccess(btn)
                 } catch (error) {
                     alert(error.message)
                 }
             });
 
             
+            function displaySuccess(btn) {
+                btn.text("OK")
+                btn.toggleClass("btn-primary")
+                btn.toggleClass("btn-success")
+                btn.attr('disabled', true);
 
+                setTimeout(function() { 
+                    btn.text('Aggiungi');
+                    btn.attr('disabled', false);
+                    btn.toggleClass("btn-primary")
+                    btn.toggleClass("btn-success")
+                }, 2000);
+            }
             
 
             // Transfer Transaction form submission
             $("#transfer-transaction-form").on("submit",async function (e) {
                 e.preventDefault();
+                let btn = $(this).closest('form').find(':submit');
+                btn.text("...")
+                let date = new Date($("#transfer-date").val());
+                date.setDate(date.getDate() + 1);
                 const from = {
-                    date: $("#transfer-date").val(),
+                    date: date,
                     category: "Trasferimento",
                     amount: -$("#transfer-amount").val(),
                     account: $("#transfer-from-account :selected").val(),
                     description: $("#transfer-description").val()
                 };
                 const to = {
-                    date: $("#transfer-date").val(),
+                    date: date,
                     category: "Trasferimento",
                     amount: $("#transfer-amount").val(),
                     account: $("#transfer-to-account :selected").val(),
@@ -241,6 +271,7 @@
                 try {
                     await $.apiClient.addTransaction(from)
                     await $.apiClient.addTransaction(to)
+                    displaySuccess(btn)
                 } catch (error) {
                     alert(error.message)
                 }

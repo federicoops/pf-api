@@ -1,5 +1,5 @@
 from fastapi import APIRouter, FastAPI, Request, Body, HTTPException, status, Response, Depends
-from app.model.transaction import Transaction, TransactionUpdate, TransactionAggregate, TransactionCreate
+from app.model.transaction import Transaction, TransactionUpdate, TransactionAggregate, TransactionCreate, TransactionOverview
 from fastapi.encoders import jsonable_encoder
 from typing import List
 from datetime import datetime
@@ -59,6 +59,43 @@ async def aggregate_transactions(
 
     transactions = list(request.app.db["transactions"].aggregate(pipeline))
     return transactions
+
+@router.get("/overview", response_model=List[TransactionOverview])
+async def overview_transactions(
+    request: Request,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    year: int = datetime.today().year
+):
+    pipeline = [
+        {
+            "$match": {
+                "date": {
+                    "$gte": datetime(year, 1, 1),
+                    "$lt": datetime(year + 1, 1, 1),
+                },
+                "amount": {"$lt": 0}
+
+            }
+        },
+        {
+            "$group": {
+                "_id": {
+                    "month": {"$month": "$date"},
+                    "category": "$category"
+                },
+                "total": {"$sum": "$amount"}
+            }
+        },
+        {
+            "$sort": {
+                "_id.month": 1,
+                "_id.category": 1
+            }
+        }
+    ]
+
+    result = list(request.app.db["transactions"].aggregate(pipeline))
+    return result
 
 @router.get("/dump")
 async def dump_transactions(

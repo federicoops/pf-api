@@ -10,6 +10,7 @@ async function onLoginSuccess() {
     $.accounts[account._id] = account;
   });
 
+
   await fetchNetCash();
   await fetchStockAssets();
 
@@ -99,10 +100,20 @@ async function fetchNetCash() {
   // Get the start of the current month
   const startOfMonthFormatted = startOfMonth.toISOString().split("T")[0];
 
+  const categories = await $.apiClient.aggregateTransactions(
+    getStartOfTime(),
+    getToday(),
+    "category"   
+  )
+
+  categories.forEach((category) => {
+    $.categories.push(category['_id'])
+  })
+
   $("#tr-start").val(startOfMonthFormatted);
   const cashNet = await $.apiClient.aggregateTransactions(
-    startOfTime.toISOString().split("T")[0],
-    todayFormatted,
+    getStartOfTime(),
+    getToday(),
     "account",
   );
   cashNet.forEach((accountNet) => {
@@ -161,12 +172,14 @@ async function onTransactionFetched(transactions) {
 }
 
 async function boot() {
+  $(".show-after-login").hide()
   const host = window.location.protocol + "//" + window.location.host;
   $.apiClient = new ApiClient(`${host}`);
   // APPLICATION DATA STATUS STORE
   $.accounts = {};
   $.stocks = {};
   $.transactions = {};
+  $.categories = []
   // -----------------------------
 
   // Check for session token in storage and check for token validity
@@ -178,17 +191,19 @@ async function boot() {
       $.apiClient.accessToken = null;
       window.localStorage.removeItem("token");
       const currentUrl = window.location.href;
+      if(!currentUrl.endsWith(".html")) return;
       const newUrl = currentUrl.replace(/\/[^/]+\.html$/, "/");
       window.location.replace(newUrl);
     }
   } else {
     const currentUrl = window.location.href;
+    if(!currentUrl.endsWith(".html")) return;
     const newUrl = currentUrl.replace(/new\.html$/, "");
     window.location.replace(newUrl);
   }
 }
 
-// Function to populate account dropdown
+// Function to populate account dropdowns
 function populateAccountDropdown(selectId) {
   const dropdown = $(`#${selectId}`);
   dropdown.empty(); // Clear existing options
@@ -199,6 +214,18 @@ function populateAccountDropdown(selectId) {
     account = $.accounts[v];
     dropdown.append(`<option value="${v}">${account.name}</option>`);
   }
+}
+
+// Function to populate category dropdowns
+function populateCategoryDropDowns(className) {
+  let dropdown = $(`.${className}`)
+  dropdown.empty(); // Clear existing options
+  dropdown.append(
+      '<option value="" disabled selected>Seleziona categoria</option>',
+  ); // Default option
+  $.categories.forEach( c =>  {
+      dropdown.append(`<option value="${c}">${c}</option>`);
+  });
 }
 
 function getToday() {

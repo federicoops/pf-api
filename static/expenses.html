@@ -26,37 +26,53 @@
 </head>
 <body>
     <div id="content" class="container-fluid mt-5">
-        <h1 class="mb-4">Transactions and Recurrent Expenses</h1>
+        <h1 class="mb-4">Dettaglio e pianificazione</h1>
         <div id="login-feedback" class="mt-3"></div>
         <a href="./"  class="btn btn-secondary show-after-login">Home</a>
         <hr>
         <div class="row">
             <!-- Planned Expenses Card -->
-            <div class="col-lg-4">
+            <div class="col-lg-3">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h5 class="card-title">Add Planned Expense</h5>
+                        <form id="incomeForm" class="mb-4">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="plannedIncome" class="form-label">Prossimo stipendio</label>
+                                    <input type="number" id="plannedIncome" class="form-control" placeholder="e.g., 3000" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">Salva</button>
+                        </form>
+    
+                        <div class="alert alert-secondary" id="netSavings">
+                            Risparmio questo mese: <b style="color:goldenrod" id="netSavingsAmount">0</b><br>
+                            Spese questo mese: <b style="color:red"id="totalExpenses">0</b><br>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-body">
                         <form id="expenseForm" class="mb-4">
                             <div class="row">
                                 <div class="col-12 mb-3">
-                                    <label for="category" class="form-label">Category</label>
-                                    <input type="text" id="category" class="form-control" placeholder="e.g., Food" required>
+                                    <input type="text" id="category" class="form-control" placeholder="Descrizione" required>
                                 </div>
                                 <div class="col-12 mb-3">
-                                    <label for="amount" class="form-label">Amount</label>
-                                    <input type="number" id="amount" class="form-control" placeholder="e.g., 100" required>
+                                    <label for="amount" class="form-label">Importo</label>
+                                    <input type="number" step="any" id="amount" class="form-control" placeholder="e.g., 100" required>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Add Expense</button>
+                            <button type="submit" class="btn btn-primary">Aggiungi ricorrente</button>
                         </form>
     
-                        <h5>Recurrent Planned Expenses</h5>
-                        <table class="table table-bordered" id="plannedExpensesTable">
+                        <table class="table " id="plannedExpensesTable">
                             <thead>
                                 <tr>
-                                    <th>Category</th>
-                                    <th class="text-right">Amount</th>
-                                    <th>Action</th>
+                                    <th>Categoria</th>
+                                    <th>Importo</th>
+                                    <th>Azioni</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -65,26 +81,27 @@
                         </table>
                     </div>
                 </div>
+
             </div>
     
             <!-- Transactions Table -->
-            <div class="col-lg-8">
-                <table id="transactionsTable" class="table table-striped table-bordered">
+            <div class="col-lg-9">
+                <table id="transactionsTable" class="table table-striped">
                     <thead>
                         <tr>
                             <th>Category</th>
-                            <th>January</th>
-                            <th>February</th>
-                            <th>March</th>
-                            <th>April</th>
-                            <th>May</th>
-                            <th>June</th>
-                            <th>July</th>
-                            <th>August</th>
-                            <th>September</th>
-                            <th>October</th>
-                            <th>November</th>
-                            <th>December</th>
+                            <th>Gennaio</th>
+                            <th>Febbraio</th>
+                            <th>Marzo</th>
+                            <th>Aprile</th>
+                            <th>Maggio</th>
+                            <th>Giugno</th>
+                            <th>Luglio</th>
+                            <th>Agosto</th>
+                            <th>Settembre</th>
+                            <th>Ottobre</th>
+                            <th>Novembre</th>
+                            <th>Dicembre</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -104,191 +121,18 @@
 <script>
     $(document).ready(async function () {
     await boot()
-    // Example Data - Replace this with your actual aggregation results
-    const transactionData = [
-    {'_id': {'month': 1, 'category': 'Abbigliamento'}, 'totalAmount': -10.0},
-{'_id': {'month': 1, 'category': 'Abbonamenti'}, 'totalAmount': -8.97},
-{'_id': {'month': 1, 'category': 'Affitto'}, 'totalAmount': -350.0},
-{'_id': {'month': 1, 'category': 'Alimentari'}, 'totalAmount': -345.96},
-{'_id': {'month': 1, 'category': 'Bar'}, 'totalAmount': -35.2},
-{'_id': {'month': 1, 'category': 'Barba/Capelli'}, 'totalAmount': -9.0},
-{'_id': {'month': 1, 'category': 'Casalinghi'}, 'totalAmount': -12.8},
-{'_id': {'month': 1, 'category': 'Cinema/Teatro'}, 'totalAmount': -12.0},
-{'_id': {'month': 1, 'category': 'Investimento'}, 'totalAmount': -20222.84},
-{'_id': {'month': 1, 'category': 'Regali'}, 'totalAmount': -52.0},
-{'_id': {'month': 1, 'category': 'Ristoranti'}, 'totalAmount': -88.96000000000001},
-{'_id': {'month': 1, 'category': 'Salute'}, 'totalAmount': -11.98},
-{'_id': {'month': 1, 'category': 'Spese Auto'}, 'totalAmount': -169.75},
-{'_id': {'month': 1, 'category': 'Tasse'}, 'totalAmount': -7.9},
-{'_id': {'month': 1, 'category': 'Trasferimento'}, 'totalAmount': -900.0},
-{'_id': {'month': 1, 'category': 'Trasporti'}, 'totalAmount': -9.0},
-{'_id': {'month': 1, 'category': 'Utenze'}, 'totalAmount': -63.89},
-{'_id': {'month': 1, 'category': 'Videogiochi'}, 'totalAmount': -3.84},
-{'_id': {'month': 2, 'category': 'Abbonamenti'}, 'totalAmount': -0.99},
-{'_id': {'month': 2, 'category': 'Affitto'}, 'totalAmount': -350.0},
-{'_id': {'month': 2, 'category': 'Alimentari'}, 'totalAmount': -313.26},
-{'_id': {'month': 2, 'category': 'Bar'}, 'totalAmount': -46.43},
-{'_id': {'month': 2, 'category': 'Barba/Capelli'}, 'totalAmount': -21.5},
-{'_id': {'month': 2, 'category': 'Benzina'}, 'totalAmount': -60.0},
-{'_id': {'month': 2, 'category': 'Casalinghi'}, 'totalAmount': -28.98},
-{'_id': {'month': 2, 'category': 'Hotel'}, 'totalAmount': -105.02},
-{'_id': {'month': 2, 'category': 'Regali'}, 'totalAmount': -42.0},
-{'_id': {'month': 2, 'category': 'Ristoranti'}, 'totalAmount': -102.6},
-{'_id': {'month': 2, 'category': 'Salute'}, 'totalAmount': -210.66},
-{'_id': {'month': 2, 'category': 'Spese Auto'}, 'totalAmount': -111.3},
-{'_id': {'month': 2, 'category': 'Tasse'}, 'totalAmount': -5.99},
-{'_id': {'month': 2, 'category': 'Trasferimento'}, 'totalAmount': -1218.62},
-{'_id': {'month': 2, 'category': 'Utenze'}, 'totalAmount': -93.59},
-{'_id': {'month': 2, 'category': 'Videogiochi'}, 'totalAmount': -28.73},
-{'_id': {'month': 3, 'category': 'Abbigliamento'}, 'totalAmount': -120.0},
-{'_id': {'month': 3, 'category': 'Abbonamenti'}, 'totalAmount': -1.98},
-{'_id': {'month': 3, 'category': 'Affitto'}, 'totalAmount': -350.0},
-{'_id': {'month': 3, 'category': 'Alimentari'}, 'totalAmount': -274.95},
-{'_id': {'month': 3, 'category': 'Altro'}, 'totalAmount': -32.29},
-{'_id': {'month': 3, 'category': 'Bar'}, 'totalAmount': -59.4},
-{'_id': {'month': 3, 'category': 'Barba/Capelli'}, 'totalAmount': -9.0},
-{'_id': {'month': 3, 'category': 'Cinema/Teatro'}, 'totalAmount': -12.0},
-{'_id': {'month': 3, 'category': 'Intrattenimento'}, 'totalAmount': -13.3},
-{'_id': {'month': 3, 'category': 'Regali'}, 'totalAmount': -32.5},
-{'_id': {'month': 3, 'category': 'Ristoranti'}, 'totalAmount': -107.23},
-{'_id': {'month': 3, 'category': 'Salute'}, 'totalAmount': -99.78},
-{'_id': {'month': 3, 'category': 'Spese Auto'}, 'totalAmount': -101.0},
-{'_id': {'month': 3, 'category': 'Trasferimento'}, 'totalAmount': -4847.18},
-{'_id': {'month': 3, 'category': 'Trasporti'}, 'totalAmount': -1.7},
-{'_id': {'month': 3, 'category': 'Utenze'}, 'totalAmount': -73.52000000000001},
-{'_id': {'month': 3, 'category': 'Videogiochi'}, 'totalAmount': -18.09},
-{'_id': {'month': 4, 'category': 'Abbonamenti'}, 'totalAmount': -1.98},
-{'_id': {'month': 4, 'category': 'Affitto'}, 'totalAmount': -350.0},
-{'_id': {'month': 4, 'category': 'Alimentari'}, 'totalAmount': -333.93},
-{'_id': {'month': 4, 'category': 'Bar'}, 'totalAmount': -75.0},
-{'_id': {'month': 4, 'category': 'Regali'}, 'totalAmount': -1.98},
-{'_id': {'month': 4, 'category': 'Ristoranti'}, 'totalAmount': -136.38},
-{'_id': {'month': 4, 'category': 'Salute'}, 'totalAmount': -133.29},
-{'_id': {'month': 4, 'category': 'Trasferimento'}, 'totalAmount': -350.0},
-{'_id': {'month': 4, 'category': 'Utenze'}, 'totalAmount': -87.58},
-{'_id': {'month': 4, 'category': 'Videogiochi'}, 'totalAmount': -18.09},
-{'_id': {'month': 5, 'category': 'Abbigliamento'}, 'totalAmount': -49.580000000000005},
-{'_id': {'month': 5, 'category': 'Abbonamenti'}, 'totalAmount': -5.970000000000001},
-{'_id': {'month': 5, 'category': 'Affitto'}, 'totalAmount': -350.0},
-{'_id': {'month': 5, 'category': 'Alimentari'}, 'totalAmount': -406.23},
-{'_id': {'month': 5, 'category': 'Altro'}, 'totalAmount': -13.49},
-{'_id': {'month': 5, 'category': 'Bar'}, 'totalAmount': -58.53},
-{'_id': {'month': 5, 'category': 'Benzina'}, 'totalAmount': -15.03},
-{'_id': {'month': 5, 'category': 'Ristoranti'}, 'totalAmount': -101.0},
-{'_id': {'month': 5, 'category': 'Salute'}, 'totalAmount': -26.8},
-{'_id': {'month': 5, 'category': 'Tasse'}, 'totalAmount': -42.0},
-{'_id': {'month': 5, 'category': 'Trasferimento'}, 'totalAmount': -2676.17},
-{'_id': {'month': 5, 'category': 'Utenze'}, 'totalAmount': -73.99000000000001},
-{'_id': {'month': 5, 'category': 'Videogiochi'}, 'totalAmount': -18.08},
-{'_id': {'month': 6, 'category': 'Abbonamenti'}, 'totalAmount': -1.98},
-{'_id': {'month': 6, 'category': 'Affitto'}, 'totalAmount': -350.0},
-{'_id': {'month': 6, 'category': 'Alimentari'}, 'totalAmount': -228.97},
-{'_id': {'month': 6, 'category': 'Altro'}, 'totalAmount': -56.86},
-{'_id': {'month': 6, 'category': 'Assicurazione'}, 'totalAmount': -10.68},
-{'_id': {'month': 6, 'category': 'Bar'}, 'totalAmount': -47.65},
-{'_id': {'month': 6, 'category': 'Benzina'}, 'totalAmount': -15.02},
-{'_id': {'month': 6, 'category': 'Intrattenimento'}, 'totalAmount': -80.83},
-{'_id': {'month': 6, 'category': 'Regali'}, 'totalAmount': -9.5},
-{'_id': {'month': 6, 'category': 'Ristoranti'}, 'totalAmount': -79.00999999999999},
-{'_id': {'month': 6, 'category': 'Trasferimento'}, 'totalAmount': -2672.65},
-{'_id': {'month': 6, 'category': 'Trasporti'}, 'totalAmount': -25.4},
-{'_id': {'month': 6, 'category': 'Utenze'}, 'totalAmount': -88.52000000000001},
-{'_id': {'month': 7, 'category': 'Abbigliamento'}, 'totalAmount': -67.66},
-{'_id': {'month': 7, 'category': 'Abbonamenti'}, 'totalAmount': -5.8},
-{'_id': {'month': 7, 'category': 'Affitto'}, 'totalAmount': -350.0},
-{'_id': {'month': 7, 'category': 'Alimentari'}, 'totalAmount': -303.84},
-{'_id': {'month': 7, 'category': 'Altro'}, 'totalAmount': -111.99000000000001},
-{'_id': {'month': 7, 'category': 'Bar'}, 'totalAmount': -53.25},
-{'_id': {'month': 7, 'category': 'Casalinghi'}, 'totalAmount': -71.69},
-{'_id': {'month': 7, 'category': 'Regali'}, 'totalAmount': -28.0},
-{'_id': {'month': 7, 'category': 'Ristoranti'}, 'totalAmount': -207.82},
-{'_id': {'month': 7, 'category': 'Salute'}, 'totalAmount': -27.0},
-{'_id': {'month': 7, 'category': 'Spese Auto'}, 'totalAmount': -40.04},
-{'_id': {'month': 7, 'category': 'Trasferimento'}, 'totalAmount': -1378.65},
-{'_id': {'month': 7, 'category': 'Utenze'}, 'totalAmount': -73.52000000000001},
-{'_id': {'month': 7, 'category': 'Videogiochi'}, 'totalAmount': -1125.37},
-{'_id': {'month': 8, 'category': 'Abbigliamento'}, 'totalAmount': -23.57},
-{'_id': {'month': 8, 'category': 'Abbonamenti'}, 'totalAmount': -10.85},
-{'_id': {'month': 8, 'category': 'Affitto'}, 'totalAmount': -350.0},
-{'_id': {'month': 8, 'category': 'Alimentari'}, 'totalAmount': -326.83},
-{'_id': {'month': 8, 'category': 'Altro'}, 'totalAmount': -52.239999999999995},
-{'_id': {'month': 8, 'category': 'Assicurazione'}, 'totalAmount': -22.19},
-{'_id': {'month': 8, 'category': 'Bar'}, 'totalAmount': -129.0},
-{'_id': {'month': 8, 'category': 'Casalinghi'}, 'totalAmount': -11.8},
-{'_id': {'month': 8, 'category': 'Cinema/Teatro'}, 'totalAmount': -12.0},
-{'_id': {'month': 8, 'category': 'Intrattenimento'}, 'totalAmount': -0.94},
-{'_id': {'month': 8, 'category': 'Ristoranti'}, 'totalAmount': -189.9},
-{'_id': {'month': 8, 'category': 'Salute'}, 'totalAmount': -9.0},
-{'_id': {'month': 8, 'category': 'Spese Auto'}, 'totalAmount': -7.0},
-{'_id': {'month': 8, 'category': 'Trasferimento'}, 'totalAmount': -3932.02},
-{'_id': {'month': 8, 'category': 'Utenze'}, 'totalAmount': -447.99},
-{'_id': {'month': 8, 'category': 'Videogiochi'}, 'totalAmount': -39.86},
-{'_id': {'month': 9, 'category': 'Abbigliamento'}, 'totalAmount': -91.59},
-{'_id': {'month': 9, 'category': 'Abbonamenti'}, 'totalAmount': -6.99},
-{'_id': {'month': 9, 'category': 'Affitto'}, 'totalAmount': -351.5},
-{'_id': {'month': 9, 'category': 'Alimentari'}, 'totalAmount': -352.15999999999997},
-{'_id': {'month': 9, 'category': 'Assicurazione'}, 'totalAmount': -22.03},
-{'_id': {'month': 9, 'category': 'Bar'}, 'totalAmount': -44.3},
-{'_id': {'month': 9, 'category': 'Benzina'}, 'totalAmount': -20.0},
-{'_id': {'month': 9, 'category': 'Regali'}, 'totalAmount': -38.99},
-{'_id': {'month': 9, 'category': 'Ristoranti'}, 'totalAmount': -109.11},
-{'_id': {'month': 9, 'category': 'Salute'}, 'totalAmount': -36.3},
-{'_id': {'month': 9, 'category': 'Spese Auto'}, 'totalAmount': -95.0},
-{'_id': {'month': 9, 'category': 'Tasse'}, 'totalAmount': -228.6},
-{'_id': {'month': 9, 'category': 'Trasferimento'}, 'totalAmount': -1917.19},
-{'_id': {'month': 9, 'category': 'Utenze'}, 'totalAmount': -83.25999999999999},
-{'_id': {'month': 10, 'category': 'Abbigliamento'}, 'totalAmount': -36.03},
-{'_id': {'month': 10, 'category': 'Abbonamenti'}, 'totalAmount': -53.81},
-{'_id': {'month': 10, 'category': 'Affitto'}, 'totalAmount': -351.5},
-{'_id': {'month': 10, 'category': 'Alimentari'}, 'totalAmount': -312.29},
-{'_id': {'month': 10, 'category': 'Altro'}, 'totalAmount': -4.3},
-{'_id': {'month': 10, 'category': 'Assicurazione'}, 'totalAmount': -22.03},
-{'_id': {'month': 10, 'category': 'Bar'}, 'totalAmount': -84.0},
-{'_id': {'month': 10, 'category': 'Benzina'}, 'totalAmount': -15.0},
-{'_id': {'month': 10, 'category': 'Casalinghi'}, 'totalAmount': -8.78},
-{'_id': {'month': 10, 'category': 'Cinema/Teatro'}, 'totalAmount': -75.99},
-{'_id': {'month': 10, 'category': 'Hotel'}, 'totalAmount': -26.8},
-{'_id': {'month': 10, 'category': 'Ristoranti'}, 'totalAmount': -112.24},
-{'_id': {'month': 10, 'category': 'Spese Auto'}, 'totalAmount': -110.0},
-{'_id': {'month': 10, 'category': 'Tasse'}, 'totalAmount': -29.4},
-{'_id': {'month': 10, 'category': 'Trasferimento'}, 'totalAmount': -2190.88},
-{'_id': {'month': 10, 'category': 'Trasporti'}, 'totalAmount': -37.2},
-{'_id': {'month': 10, 'category': 'Utenze'}, 'totalAmount': -87.41},
-{'_id': {'month': 11, 'category': 'Abbigliamento'}, 'totalAmount': -23.53},
-{'_id': {'month': 11, 'category': 'Abbonamenti'}, 'totalAmount': -3.76},
-{'_id': {'month': 11, 'category': 'Affitto'}, 'totalAmount': -350.0},
-{'_id': {'month': 11, 'category': 'Alimentari'}, 'totalAmount': -363.43},
-{'_id': {'month': 11, 'category': 'Altro'}, 'totalAmount': -5.14},
-{'_id': {'month': 11, 'category': 'Assicurazione'}, 'totalAmount': -22.03},
-{'_id': {'month': 11, 'category': 'Bar'}, 'totalAmount': -35.4},
-{'_id': {'month': 11, 'category': 'Benzina'}, 'totalAmount': -30.0},
-{'_id': {'month': 11, 'category': 'Casalinghi'}, 'totalAmount': -23.89},
-{'_id': {'month': 11, 'category': 'Cinema/Teatro'}, 'totalAmount': -12.5},
-{'_id': {'month': 11, 'category': 'Intrattenimento'}, 'totalAmount': -2.35},
-{'_id': {'month': 11, 'category': 'Regali'}, 'totalAmount': -65.0},
-{'_id': {'month': 11, 'category': 'Ristoranti'}, 'totalAmount': -127.3},
-{'_id': {'month': 11, 'category': 'Salute'}, 'totalAmount': -24.8},
-{'_id': {'month': 11, 'category': 'Spese Auto'}, 'totalAmount': -162.2},
-{'_id': {'month': 11, 'category': 'Trasferimento'}, 'totalAmount': -1915.54},
-{'_id': {'month': 11, 'category': 'Trasporti'}, 'totalAmount': -31.2},
-{'_id': {'month': 11, 'category': 'Utenze'}, 'totalAmount': -81.59},
-{'_id': {'month': 12, 'category': 'Abbonamenti'}, 'totalAmount': -0.98},
-{'_id': {'month': 12, 'category': 'Alimentari'}, 'totalAmount': -93.94},
-{'_id': {'month': 12, 'category': 'Assicurazione'}, 'totalAmount': -22.03},
-{'_id': {'month': 12, 'category': 'Regali'}, 'totalAmount': -34.9},
-{'_id': {'month': 12, 'category': 'Trasferimento'}, 'totalAmount': -1592.33},
-    ];
-
+    $.transactionData = await $.apiClient.getOverview(2024)
+ 
     // Transform data into a pivot table format
     const pivotData = {};
     const monthlyTotals = Array(12).fill(0);
-    transactionData.forEach(({ _id, totalAmount }) => {
+    $.transactionData.forEach(({ _id, total }) => {
         if(_id.category == "Trasferimento" || _id.category == "Investimento") return;
         if (!pivotData[_id.category]) pivotData[_id.category] = Array(12).fill(0);
-        pivotData[_id.category][_id.month - 1] = totalAmount;
+        pivotData[_id.category][_id.month - 1] = total;
         
         // Update monthly totals
-        monthlyTotals[_id.month - 1] += totalAmount;
+        monthlyTotals[_id.month - 1] += total;
     });
 
     // Add total row
@@ -296,7 +140,7 @@
 
     const totalRow = `<tr class="table-secondary">
         <td><strong>Totale</strong></td>
-        ${monthlyTotals.map(total => `<td class="text-right"><strong>${total.toFixed()+" €"}</strong></td>`).join('')}
+        ${monthlyTotals.map(total => `<td class="text-right"><strong>${total.toFixed(2)+" €"}</strong></td>`).join('')}
     </tr>`;
     tbody.append(totalRow);
 
@@ -304,7 +148,7 @@
     Object.entries(pivotData).forEach(([category, months]) => {
         const row = `<tr>
             <td>${category}</td>
-            ${months.map(amount => `<td class="text-right">${amount.toFixed()+" €" || 0}</td>`).join('')}
+            ${months.map(amount => `<td class="text-right">${amount.toFixed(2)+" €" || 0}</td>`).join('')}
         </tr>`;
         tbody.append(row);
     });
@@ -317,12 +161,43 @@
         ordering: false
     });
 
-    // Local Storage Key
+    // Local Storage Keys
     const plannedExpensesKey = "plannedExpenses";
+    const plannedIncomeKey = "plannedIncome";
 
-    // Retrieve or initialize planned expenses from local storage
+    // Retrieve or initialize planned income and expenses from local storage
     const getPlannedExpenses = () => JSON.parse(localStorage.getItem(plannedExpensesKey)) || [];
     const savePlannedExpenses = (expenses) => localStorage.setItem(plannedExpensesKey, JSON.stringify(expenses));
+    const getPlannedIncome = () => parseFloat(localStorage.getItem(plannedIncomeKey)) || 0;
+    $("#plannedIncome").val(getPlannedIncome())
+    const savePlannedIncome = (income) => localStorage.setItem(plannedIncomeKey, income);
+
+    function isCurrentMonthExpense(transaction) {
+        const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed
+        return (transaction['_id'].month === currentMonth) && 
+            transaction.total < 0 && 
+            !(transaction._id.category == "Trasferimento" || transaction._id.category == "Investimento")
+    }
+
+    // Function to get the total actual expenses for the current month
+    const getActualExpensesForCurrentMonth = () => {
+        const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed
+        return $.transactionData
+            .filter(transaction => isCurrentMonthExpense(transaction))
+            .reduce((sum, transaction) => sum + transaction.total, 0);
+    };
+
+    // Function to calculate and update net savings
+    const updateNetSavings = () => {
+        const plannedExpenses = getPlannedExpenses().filter(e => e.enabled).reduce((sum, expense) => sum + expense.amount, 0);
+        const actualExpenses = getActualExpensesForCurrentMonth();
+        const plannedIncome = getPlannedIncome();
+        const totalExpenses = -(-plannedExpenses+actualExpenses)
+        const netSavings = plannedIncome - (totalExpenses);
+        $("#netSavingsAmount").text(netSavings.toFixed(2)+" €");
+        $("#totalExpenses").text(totalExpenses.toFixed(2)+" €");
+
+    };
 
     // Function to populate the planned expenses table
     const loadPlannedExpensesTable = () => {
@@ -333,9 +208,10 @@
         expenses.forEach((expense, index) => {
             const row = `<tr>
                 <td>${expense.category}</td>
-                <td class="text-right">${expense.amount.toFixed(2)+" €"}</td>
+                <td class="text-right">${expense.amount.toFixed(2)+ " €"}</td>
                 <td>
                     <button class="btn btn-danger btn-sm delete-expense" data-index="${index}">Delete</button>
+                    <input class="form-check-input enable-recurrent" type="checkbox"  data-index="${index}" ${(expense.enabled)?'checked':''}>
                 </td>
             </tr>`;
             tbody.append(row);
@@ -345,7 +221,21 @@
         $(".delete-expense").on("click", function () {
             const index = $(this).data("index");
             deletePlannedExpense(index);
+            updateNetSavings();
         });
+
+        // Attach delete handlers
+        $(".enable-recurrent").on("click", function () {
+            const index = $(this).data("index");
+            
+            const expenses = getPlannedExpenses()
+            expenses[index].enabled = $(this).prop('checked')
+            savePlannedExpenses(expenses);
+            updateNetSavings();
+        });
+
+        // Update net savings
+        updateNetSavings();
     };
 
     // Function to delete a planned expense by index
@@ -356,7 +246,7 @@
         loadPlannedExpensesTable();
     };
 
-    // Form submission handler
+    // Expense form submission handler
     $("#expenseForm").on("submit", function (e) {
         e.preventDefault();
         const category = $("#category").val();
@@ -372,8 +262,18 @@
         loadPlannedExpensesTable();
     });
 
-    // Initial load of planned expenses table
+    // Income form submission handler
+    $("#incomeForm").on("submit", function (e) {
+        e.preventDefault();
+        const income = parseFloat($("#plannedIncome").val());
+
+        savePlannedIncome(income);
+        updateNetSavings();
+    });
+
+    // Load planned expenses and update net savings
     loadPlannedExpensesTable();
+    updateNetSavings();
 });
 </script>
 });

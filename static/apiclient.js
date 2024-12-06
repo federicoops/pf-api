@@ -146,4 +146,8 @@ class ApiClient {
   async dump() {
     return this.request("/api/transactions/dump", "GET", null, {}, true);
   }
+
+  async getOverview(year=new Date().getFullYear()) {
+    return this.request("/api/transactions/overview", "GET", null, {year:year})
+  }
 }

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict
 import uuid
 from app.model.pyobjectid import PyObjectId
 
@@ -43,3 +43,11 @@ class TransactionAggregate(BaseModel):
     total: float
     quantity: Optional[float] = None
     total_wfee: Optional[float] = None
+
+class OverviewGroup(BaseModel):
+    month: int
+    category: str
+
+class TransactionOverview(BaseModel):
+    group: OverviewGroup = Field(alias="_id")
+    total: float

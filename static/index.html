@@ -33,6 +33,7 @@
             <div id="login-feedback" class="mt-3"></div>
             <a href="./new.html"  class="btn btn-primary show-after-login">Nuovo movimento</a>
             <a href="./transactions.html"  class="btn btn-success show-after-login">Tutti i movimenti</a>
+            <a href="./expenses.html"  class="btn btn-secondary show-after-login">Dettaglio spese</a>
 
         </div>
 
@@ -87,9 +88,7 @@
 
     <script>
         $(document).ready(async function () {
-            $(".show-after-login").hide()
-            const host = window.location.protocol + "//" + window.location.host;
-            $.apiClient = new ApiClient(`${host}`);
+            await boot()
 
             const simpleTable = {
                 "bPaginate": false,
@@ -104,24 +103,9 @@
             $.stocksTable = $("#stocks-table").DataTable(simpleTable);
             $.accountsTable = $("#accounts-table").DataTable(simpleTable);
 
-            // APPLICATION DATA STATUS STORE
-            $.accounts = {}
-            $.stocks = {}
-            $.transactions = {}
-            // -----------------------------
 
-            // Check for session token in storage and check for token validity
-            if($.apiClient.isLogged()) {
-                try {
-                    const me = await $.apiClient.getMe()
-                    onLoginSuccess()
-                } catch (error) {
-                    $.apiClient.accessToken = null
-                    window.localStorage.removeItem('token')
-                }
-            }
             
-                // Login form submission
+            // Login form submission
             $("#login-form").on("submit", async function (e) {
                 e.preventDefault();
 
