@@ -1,5 +1,6 @@
 # Step 0: stop active containers
 docker stop pf-db pf-api
+docker image prune
 
 # Step 1: Create a Docker volume for MongoDB data persistence
 docker volume create pf-db-data
@@ -30,5 +31,4 @@ docker run -d  \
   -p 8000:8000 \
   -v "${PWD}/static:/pfapi/static/" \
   -v "${PWD}/env:/pfapi/env/" \
-
   pf-api
