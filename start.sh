@@ -29,4 +29,6 @@ docker run -d  \
   --network pf-network \
   -p 8000:8000 \
   -v "${PWD}/static:/pfapi/static/" \
+  -v "${PWD}/env:/pfapi/env/" \
+
   pf-api
