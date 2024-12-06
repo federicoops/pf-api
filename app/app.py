@@ -16,7 +16,6 @@ app.mount("/app", StaticFiles(directory="static",html = True), name="static")
 @app.on_event("startup")
 def startup_db_client():
     config = dotenv_values("./env/.env")
-    print(config["MONGO_URI"])
     app.mongodb_client = MongoClient(config["MONGO_URI"])
     app.db = app.mongodb_client[config["MONGO_DB"]]
 

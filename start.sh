@@ -8,6 +8,7 @@ docker volume create pf-db-data
 docker network create pf-network
 
 # Step 3: Run the MongoDB container with persistent storage
+# username and password are just an example, change them!
 docker run -d \
   --rm \
   --name pf-db \
@@ -28,6 +29,4 @@ docker run -d  \
   --network pf-network \
   -p 8000:8000 \
   -v "${PWD}/static:/pfapi/static/" \
-  -e MONGO_URI=mongodb://root:example@pf-db:27017 \
-  -e MONGO_DB=pf-api \
   pf-api
