@@ -61,7 +61,7 @@ class ApiClient {
       grant_type: "password",
     });
 
-    const response = await fetch(this.baseURL + "/api/auth", {
+    const response = await fetch(this.baseURL + "/api/auth/", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: data,
