@@ -10,11 +10,27 @@
     <script src="apiclient.js"></script>
     <script src="index.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <base href="/app/">
+    <link id="favicon" rel="icon" type="image/x-icon" href="./img/favicon.ico">
+    <style>
+        .logoheader {
+            display: flex;
+            align-items: center ;
+        }
+        .logoheader img {
+            width: 64px;
+            height: 64px;
+            border: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Home</h1>
-        
+        <div class="logoheader">
+            <img src="./img/icon.webp" class="img-thumbnail">
+            <h1>Home</h1>
+        </div>
+
         <!-- Authentication Section -->
         <div id="auth-section">
             <h4 class="hide-after-login">Login</h4>
