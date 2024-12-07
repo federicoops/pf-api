@@ -18,7 +18,7 @@ async def list_accounts(request: Request, current_user: Annotated[User, Depends(
 
 @router.get("/{id}", response_model=Account)
 async def find_account(id: str, request: Request, current_user: Annotated[User, Depends(get_current_active_user)]):
-    if (account := request.app.db["accounts"].find_one({"_id": id})) is not None:
+    if (account := request.app.db["accounts"].find_one({"_id": ObjectId(id)})) is not None:
         return account
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Account with ID {id} not found")
@@ -59,7 +59,7 @@ async def update_account(id: str, request: Request, current_user: Annotated[User
     if len(account) >= 1:
         print(account)
         update_result = request.app.db["accounts"].update_one(
-            {"_id": id}, {"$set": account}
+            {"_id": ObjectId(id)}, {"$set": account}
         )
 
         if update_result.modified_count == 0:

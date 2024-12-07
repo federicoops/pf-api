@@ -5,6 +5,12 @@ async function onLoginSuccess() {
     `<div class="alert alert-success">Ciao, <b>${me.username}</b><div id="total-net-worth"></div></div>`,
   );
 
+  await refreshAccounts()
+  $(".show-after-login").show();
+}
+
+async function refreshAccounts() {
+  $.accounts = {};
   const accounts = await $.apiClient.listAccounts();
   accounts.forEach((account) => {
     $.accounts[account._id] = account;
@@ -12,9 +18,7 @@ async function onLoginSuccess() {
 
 
   await fetchNetCash();
-  await fetchStockAssets();
-
-  $(".show-after-login").show();
+  await fetchStockAssets(); 
 }
 
 function updateTotalNetWorth() {
@@ -154,7 +158,8 @@ async function onTransactionFetched(transactions) {
   // Populate table
   transactions.forEach((transaction) => {
     $.transactions[transaction._id] = transaction;
-    const account = $.accounts[transaction.account];
+    let account = $.accounts[transaction.account];
+    if(account == undefined) account = {'name': 'conto eliminato'}
     const date = new Date(transaction.date);
     $.transactionsTable.row.add({
       id: transaction._id,

@@ -9,9 +9,15 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h5>Nuovo movimento</h5>
+        <h4>Nuovo movimento</h4>
         <div id="login-feedback" class="mt-3"></div>
-        <a href="./"  class="btn btn-secondary show-after-login">Home</a>
+        <div class="d-flex flex-column flex-md-row gap-2">
+            <a href="/app/"  class="btn btn-light show-after-login">Home</a>
+            <a href="/app/new.html"  class="btn btn-primary show-after-login">Nuovo movimento</a>
+            <a href="/app/transactions.html"  class="btn btn-light show-after-login">Tutti i movimenti</a>
+            <a href="/app/expenses.html"  class="btn btn-light show-after-login">Dettaglio spese</a>
+            <a href="/app/accounts.html"  class="btn btn-light show-after-login">Conti</a>
+        </div>
         <hr>
         <!-- Tabs for selecting transaction type -->
         <ul class="nav nav-tabs" id="transactionTabs" role="tablist">

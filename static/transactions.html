@@ -26,13 +26,18 @@
         </style>
     </head>
     <body>
-        <div id="transactions-section" class="p-3">
+        <div id="transactions-section" class="container-fluid mt-5">
             <h4>Movimenti</h4>
             <div id="login-feedback" class="mt-3"></div>
-            <a href="./" class="btn btn-secondary show-after-login">Home</a>
-            <button id="backup" class="btn btn-primary show-after-login">
-                Backup
-            </button>
+            <div class="d-flex flex-column flex-md-row gap-2">
+                <a href="/app/"  class="btn btn-light show-after-login">Home</a>
+                <a href="/app/new.html"  class="btn btn-light show-after-login">Nuovo movimento</a>
+                <a href="/app/transactions.html"  class="btn btn-primary show-after-login">Tutti i movimenti</a>
+                <a href="/app/expenses.html"  class="btn btn-light show-after-login">Dettaglio spese</a>
+                <a href="/app/accounts.html"  class="btn btn-light show-after-login">Conti</a>
+            </div>            
+            <hr />
+            <button id="backup" class="btn btn-success show-after-login">Backup</button>
             <hr />
             <div class="d-flex gap-2 mb-3">
                 <input
