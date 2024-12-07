@@ -23,9 +23,6 @@ def startup_db_client():
 def shutdown_db_client():
     app.mongodb_client.close()
 
-@app.get('/favicon.ico', include_in_schema=False)
-async def favicon():
-    return FileResponse("./static/img/favicon.ico")
 
 
 app.include_router(tx_router)
