@@ -3,6 +3,8 @@ import os
 from fastapi.staticfiles import StaticFiles
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
+
 from app.routes.transactions import router as tx_router
 from app.routes.accounts import router as acc_router
 from app.routes.tickers import router as tk_router
@@ -23,6 +25,9 @@ def startup_db_client():
 def shutdown_db_client():
     app.mongodb_client.close()
 
+@app.get("/", include_in_schema=False)  # Route to handle the redirection
+async def redirect_to_app():
+    return RedirectResponse(url="/app")
 
 
 app.include_router(tx_router)
