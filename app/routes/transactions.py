@@ -73,7 +73,7 @@ async def overview_transactions(
                     "$gte": datetime(year, 1, 1),
                     "$lt": datetime(year + 1, 1, 1),
                 },
-                "amount": {"$lt": 0}
+                #"amount": {"$lt": 0}
 
             }
         },

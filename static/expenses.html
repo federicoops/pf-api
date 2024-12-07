@@ -54,9 +54,9 @@
                         </form>
     
                         <div class="alert alert-primary" id="netSavings">
-                            Risparmio questo mese: <b style="color:goldenrod" id="netSavingsAmount">0</b><br>
-                            Spese questo mese: <b style="color:red"id="totalExpenses">0</b><br>
-
+                            Risparmio previsto: <b style="color:goldenrod" id="netSavingsAmount">0</b><br>
+                            Spese previste: <b style="color:red"id="totalExpenses">0</b><br>
+                            Entrate previste: <b style="color:green"id="totalIncomes">0</b><br>
                         </div>
                     </div>
                 </div>
@@ -136,6 +136,7 @@
     const monthlyTotals = Array(12).fill(0);
     $.transactionData.forEach(({ _id, total }) => {
         if(_id.category == "Trasferimento" || _id.category == "Investimento") return;
+        if(total > 0) return;
         if (!pivotData[_id.category]) pivotData[_id.category] = Array(12).fill(0);
         pivotData[_id.category][_id.month - 1] = total;
         
@@ -187,24 +188,33 @@
             !(transaction._id.category == "Trasferimento" || transaction._id.category == "Investimento")
     }
 
-    // Function to get the total actual expenses for the current month
-    const getActualExpensesForCurrentMonth = () => {
+    function isCurrentMonthIncome(transaction) {
+        const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed
+        return (transaction['_id'].month === currentMonth) && 
+            transaction.total > 0 && 
+            !(transaction._id.category == "Trasferimento" || transaction._id.category == "Investimento")
+    }
+
+    // Function to get the total actual expenses/incomes for the current month
+    const getActualTotalForCurrentMonth = (filter) => {
         const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed
         return $.transactionData
-            .filter(transaction => isCurrentMonthExpense(transaction))
+            .filter(transaction => filter(transaction))
             .reduce((sum, transaction) => sum + transaction.total, 0);
     };
 
     // Function to calculate and update net savings
     const updateNetSavings = () => {
         const plannedExpenses = getPlannedExpenses().filter(e => e.enabled).reduce((sum, expense) => sum + expense.amount, 0);
-        const actualExpenses = getActualExpensesForCurrentMonth();
+        const actualExpenses = getActualTotalForCurrentMonth(isCurrentMonthExpense);
+        const actualIncomes = getActualTotalForCurrentMonth(isCurrentMonthIncome);
         const plannedIncome = getPlannedIncome();
         const totalExpenses = -(-plannedExpenses+actualExpenses)
-        const netSavings = plannedIncome - (totalExpenses);
+        const totalIncomes = plannedIncome+actualIncomes
+        const netSavings = totalIncomes - (totalExpenses);
         $("#netSavingsAmount").text(netSavings.toFixed(2)+" €");
         $("#totalExpenses").text(totalExpenses.toFixed(2)+" €");
-
+        $("#totalIncomes").text(totalIncomes.toFixed(2)+" €")
     };
 
     // Function to populate the planned expenses table
@@ -284,7 +294,6 @@
     updateNetSavings();
 });
 </script>
-});
 
 </script>
 </body>
