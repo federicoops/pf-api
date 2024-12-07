@@ -27,7 +27,7 @@ def shutdown_db_client():
 
 @app.get("/", include_in_schema=False)  # Route to handle the redirection
 async def redirect_to_app():
-    return RedirectResponse(url="/app")
+    return RedirectResponse(url="/app/")
 
 
 app.include_router(tx_router)
