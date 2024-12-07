@@ -176,9 +176,22 @@ async function onTransactionFetched(transactions) {
   $.transactionsTable.draw();
 }
 
+function getBaseUrl() {
+  const currentUrl = window.location.href;
+  const appIndex = currentUrl.indexOf('/app/');
+
+  // If "/app/" exists in the URL, strip everything after it
+  if (appIndex !== -1) {
+      return currentUrl.substring(0, appIndex); // Include the trailing slash
+  }
+
+  // Fallback: return the root if "/app/" is not found
+  return '/';
+}
+
 async function boot() {
   $(".show-after-login").hide()
-  const host = window.location.protocol + "//" + window.location.host;
+  const host = getBaseUrl();
   $.apiClient = new ApiClient(`${host}`);
   // APPLICATION DATA STATUS STORE
   $.accounts = {};
