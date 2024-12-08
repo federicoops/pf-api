@@ -142,8 +142,8 @@ class ApiClient {
   }
 
   // Tickers
-  async getTickerPrice(ticker) {
-    return this.request(`/api/tickers/${ticker}`, "GET");
+  async getTickerPrice(ticker, year) {
+    return this.request(`/api/tickers/${ticker}`, "GET", null, {year:year});
   }
 
   // Users

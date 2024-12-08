@@ -98,8 +98,15 @@ $(document).ready(async function () {
 
         // Add the total row at the beginning
         const totalRowData = ["Totale", ...totals.map(total => `${total.toFixed(2)} €`)];
+        const yields = totals.slice(1).map((current, i) => 
+            totals[i] !== 0 ? ((current - totals[0]) / totals[0]) * 100 : null
+        );
+        const yieldRowData = ["Yield", "-",...yields.map(yield => `${yield.toFixed(2)} %`)];
         const totalRowNode = table.row.add(totalRowData).node();
         $(totalRowNode).addClass("table-primary").css("font-weight", "bold");
+
+        const yieldRowNode = table.row.add(yieldRowData).node();
+        $(yieldRowNode).addClass("table-success").css("font-weight", "bold");
 
         Object.entries(balances).forEach(([account, months]) => {
             if (!$.accounts[account]) return;
@@ -108,40 +115,44 @@ $(document).ready(async function () {
         });
 
         table.draw(); // Redraw the table
+    }
 
+    function aggregateInvestments(monthlyInvestments, quotes, month, tickers) {
+        if(month > 1) {
+                // Copy all tickers from previous month
+                for(a in quotes)  quotes[a][month - 1] = JSON.parse(JSON.stringify(quotes[a][month - 2]))
+        }
+        monthlyInvestments.forEach(({ account, quantity, ticker }) => {
+            tickers.add(ticker)
+            if(!quotes[account]) {
+                quotes[account] = Array(12)
+                for (let m = 1; m <= 12; m++) quotes[account][m-1] = new Object()
+            }
+
+            if(month > 1) { // Others
+                if(!quotes[account][month - 2][ticker]) quotes[account][month - 1][ticker] = quantity;
+                else quotes[account][month - 1][ticker] = quotes[account][month - 2][ticker] + quantity
+            } else { // January
+                if(!quotes[account][month - 1][ticker]) quotes[account][month - 1][ticker] = quantity;
+                else quotes[account][month - 1][ticker] += quantity;
+            }
+        });
     }
 
     async function loadBalancesForYear(year) {
-        const balances = {};
-        quotes = {}
-        const totals = Array(12).fill(0); // Initialize totals for each month
+        let balances = {};
+        let quotes = {}
+        let totals = Array(12).fill(0); // Initialize totals for each month
+        let tickers = new Set()
         for (let month = 1; month <= 12; month++) {
             const startDate = getStartOfTime();
             const startOfMonth = new Date(year, month-1, 0).toISOString().split('T')[0];
             const endDate = new Date(year, month, 0).toISOString().split('T')[0];
-            const monthlyData = await $.apiClient.aggregateTransactions(startDate, endDate, "account");
-            const monthlyInvestments = await $.apiClient.listInvestments(startOfMonth, endDate)
+            let monthlyData = await $.apiClient.aggregateTransactions(startDate, endDate, "account");
+            let monthlyInvestments = await $.apiClient.listInvestments(startOfMonth, endDate)
 
-            if(month > 1) {
-                // Copy all tickers from previous month
-                for(a in quotes)  quotes[a][month - 1] = JSON.parse(JSON.stringify(quotes[a][month - 2]))
-            }
+            aggregateInvestments(monthlyInvestments, quotes, month, tickers)
 
-            monthlyInvestments.forEach(({ account, quantity, ticker }) => {
-                if(!quotes[account]) {
-                    quotes[account] = Array(12)
-                    for (let m = 1; m <= 12; m++) quotes[account][m-1] = new Object()
-                }
-
-                if(month > 1) { // Others
-                    if(!quotes[account][month - 2][ticker]) quotes[account][month - 1][ticker] = quantity;
-                    else quotes[account][month - 1][ticker] = quotes[account][month - 2][ticker] + quantity
-                } else { // January
-                    if(!quotes[account][month - 1][ticker]) quotes[account][month - 1][ticker] = quantity;
-                    else quotes[account][month - 1][ticker] += quantity;
-                }
-            });
-            
             // Process data for all accounts in the result
             monthlyData.forEach(({ _id, total }) => {
                 if (!balances[_id]) {
@@ -149,21 +160,24 @@ $(document).ready(async function () {
                 }
                 balances[_id][month - 1] = total || 0;
                 totals[month - 1] += total || 0; // Accumulate totals for each month
+
             });
 
         }
 
-        const stockAssets = {};
-        for(a in quotes) {
-            account = quotes[a]
-            for(m in account) {
-                month = account[m];
-                monthTotal = 0
-                for(ticker in month) {
-                    data = await $.apiClient.getTickerPrice(ticker, /* insert date here */);
-                    monthTotal+= data.price * month[ticker]
-                }
+        const tickerArr = Array.from(tickers)
+        let cachedPrices = undefined;
+        if(tickerArr.length > 0) cachedPrices = await $.apiClient.getTickerPrice(tickerArr.join(','), year)
 
+        for(a in quotes) {
+            let account = quotes[a]
+            for(m in account) {
+                let month = account[m];
+                let monthTotal = 0
+                for(ticker in month) {
+                    let price = cachedPrices[m][tickerArr.indexOf(ticker)]
+                    monthTotal+= price * month[ticker]
+                }
                 if(!balances[a]) balances[a] = Array(12).fill(0); 
                 balances[a][m] = monthTotal
                 totals[m] += monthTotal
@@ -209,7 +223,7 @@ $(document).ready(async function () {
             ...["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
                 "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
                 .map(month => ({ title: month, className: "text-right" }))
-        ]
+        ],
     });
 
     const currentYear = new Date().getFullYear();
