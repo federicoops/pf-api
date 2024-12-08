@@ -13,6 +13,7 @@ router = APIRouter(prefix="/api/tickers")
 @router.get("/{ticker}")
 def get_price(ticker: str, current_user: Annotated[User, Depends(get_current_active_user)]):
     ticker_obj = yf.Ticker(ticker)
+
     try:
         return {'ticker':ticker, 'price': ticker_obj.fast_info['lastPrice'], 'currency': ticker_obj.fast_info['currency']}
     except:

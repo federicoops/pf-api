@@ -13,6 +13,7 @@ class Transaction(BaseModel):
     date: datetime  # Default to today's date
     description: Optional[str] = None  # Optional description with default as an empty string
     price: Optional[float] = None  # Default to -1 if not provided
+    priceAtDate: Optional[float] = None  # Used by transaction queries to piggyback the price at a certain date 
     quantity: Optional[float] = None
     ticker: Optional[str] = None  # Optional ticker with default as an empty string
     class Config:

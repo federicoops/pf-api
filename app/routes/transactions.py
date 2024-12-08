@@ -10,6 +10,7 @@ from bson import ObjectId
 from fastapi.responses import StreamingResponse
 import csv
 from io import StringIO
+import yfinance as yf
 
 
 router = APIRouter(prefix="/api/transactions")
@@ -19,15 +20,23 @@ router = APIRouter(prefix="/api/transactions")
 async def list_transactions(
     request: Request, current_user: Annotated[User, Depends(get_current_active_user)],
     start_date: datetime = datetime.today().replace(day=1),
-    end_date: datetime = datetime.today()):
+    end_date: datetime = datetime.today(),
+    category: str = "", investment: bool = False):
 
+    match = {"$match": {"date": {"$gte": start_date, "$lte": end_date}}}
+
+    if category != "":
+        match["$match"]["category"] = category
+    if investment:
+        match["$match"]["ticker"] = {"$exists": True}
     pipeline = [
-        {"$match": {"date": {"$gte": start_date, "$lte": end_date}}},  # Filter by date range
-        {"$sort": {"date": -1}}
+        match, 
+        {"$sort": {"date": -1}}   
     ]
-
     transactions = list(request.app.db["transactions"].aggregate(pipeline))
     return transactions
+
+
 
 @router.get("/aggregate", response_model=List[TransactionAggregate])
 async def aggregate_transactions(

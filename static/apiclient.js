@@ -84,6 +84,14 @@ class ApiClient {
     });
   }
 
+  async listInvestments(startDate, endDate) {
+    return this.request("/api/transactions/", "GET", null, {
+      start_date: startDate,
+      end_date: endDate,
+      investment: true
+    });  
+  }
+
   async addTransaction(transactionData) {
     return this.request("/api/transactions/", "POST", transactionData);
   }
