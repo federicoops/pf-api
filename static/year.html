@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PF: Account Balances by Month</title>
+    <link 
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
+        rel="stylesheet">
+    <link 
+        href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" 
+        rel="stylesheet">
+    <link id="favicon" rel="icon" type="image/x-icon" href="./img/favicon.ico">
+    <style>
+        .text-right {
+            text-align: right;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="content" class="container-fluid mt-5">
+        <h4>Saldo Mensile per Account</h4>
+        <div id="login-feedback" class="mt-3"></div>
+        <div class="d-flex flex-column flex-md-row gap-2">
+            <a href="./"  class="btn btn-light show-after-login">Home</a>
+            <a href="./new.html"  class="btn btn-light show-after-login">Nuovo movimento</a>
+            <a href="./transactions.html"  class="btn btn-light show-after-login">Tutti i movimenti</a>
+            <a href="./expenses.html"  class="btn btn-light show-after-login">Dettaglio spese</a>
+            <a href="./accounts.html"  class="btn btn-light show-after-login">Conti</a>
+            <a href="./year.html"  class="btn btn-primary show-after-login">Vista anno</a>
+        </div>
+        <hr>
+        <div class="d-flex align-items-center mb-3">
+            <select id="yearSelector" class="form-select w-auto">
+                <option value="" disabled selected>Seleziona Anno</option>
+            </select>
+            <button id="loadBalances" class="btn btn-primary ms-2">
+                <span class="loaded">Carica</span>
+                <span class="loading spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="loading sr-only">Loading...</span>
+            </button>
+        </div>
+        <hr>
+        <table id="balancesTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Account</th>
+                    <th>Gennaio</th>
+                    <th>Febbraio</th>
+                    <th>Marzo</th>
+                    <th>Aprile</th>
+                    <th>Maggio</th>
+                    <th>Giugno</th>
+                    <th>Luglio</th>
+                    <th>Agosto</th>
+                    <th>Settembre</th>
+                    <th>Ottobre</th>
+                    <th>Novembre</th>
+                    <th>Dicembre</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be dynamically populated -->
+            </tbody>
+        </table>
+    </div>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script 
+    src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script 
+    src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="apiclient.js"></script>
+<script src="index.js"></script>
+<script>
+$(document).ready(async function () {
+    await boot();
+
+    function initializeYearSelector() {
+        const currentYear = new Date().getFullYear();
+        const yearSelector = $("#yearSelector");
+
+        // Populate options for the last 3 years up to the current year
+        for (let year = currentYear - 3; year <= currentYear; year++) {
+            const selected = year === currentYear ? 'selected' : '';
+            yearSelector.append(`<option value="${year}" ${selected}>${year}</option>`);
+        }
+    }
+
+
+    function drawTable(balances, totals, quotes) {
+        // Populate table
+        const table = $("#balancesTable").DataTable();
+        table.clear(); // Clear existing rows
+
+        // Add the total row at the beginning
+        const totalRowData = ["Totale", ...totals.map(total => `${total.toFixed(2)} €`)];
+        const totalRowNode = table.row.add(totalRowData).node();
+        $(totalRowNode).addClass("table-primary").css("font-weight", "bold");
+
+        Object.entries(balances).forEach(([account, months]) => {
+            if (!$.accounts[account]) return;
+            const rowData = [$.accounts[account].name, ...months.map(amount => `${amount.toFixed(2)} €`)];
+            table.row.add(rowData); // Add new rows
+        });
+
+        table.draw(); // Redraw the table
+
+    }
+
+    async function loadBalancesForYear(year) {
+        const balances = {};
+        quotes = {}
+        const totals = Array(12).fill(0); // Initialize totals for each month
+        for (let month = 1; month <= 12; month++) {
+            const startDate = getStartOfTime();
+            const startOfMonth = new Date(year, month-1, 0).toISOString().split('T')[0];
+            const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+            const monthlyData = await $.apiClient.aggregateTransactions(startDate, endDate, "account");
+            const monthlyInvestments = await $.apiClient.listInvestments(startOfMonth, endDate)
+
+            if(month > 1) {
+                // Copy all tickers from previous month
+                for(a in quotes)  quotes[a][month - 1] = JSON.parse(JSON.stringify(quotes[a][month - 2]))
+            }
+
+            monthlyInvestments.forEach(({ account, quantity, ticker }) => {
+                if(!quotes[account]) {
+                    quotes[account] = Array(12)
+                    for (let m = 1; m <= 12; m++) quotes[account][m-1] = new Object()
+                }
+
+                if(month > 1) { // Others
+                    if(!quotes[account][month - 2][ticker]) quotes[account][month - 1][ticker] = quantity;
+                    else quotes[account][month - 1][ticker] = quotes[account][month - 2][ticker] + quantity
+                } else { // January
+                    if(!quotes[account][month - 1][ticker]) quotes[account][month - 1][ticker] = quantity;
+                    else quotes[account][month - 1][ticker] += quantity;
+                }
+            });
+            
+            // Process data for all accounts in the result
+            monthlyData.forEach(({ _id, total }) => {
+                if (!balances[_id]) {
+                    balances[_id] = Array(12).fill(0); // Initialize array for 12 months
+                }
+                balances[_id][month - 1] = total || 0;
+                totals[month - 1] += total || 0; // Accumulate totals for each month
+            });
+
+        }
+
+        const stockAssets = {};
+        for(a in quotes) {
+            account = quotes[a]
+            for(m in account) {
+                month = account[m];
+                monthTotal = 0
+                for(ticker in month) {
+                    data = await $.apiClient.getTickerPrice(ticker, /* insert date here */);
+                    monthTotal+= data.price * month[ticker]
+                }
+
+                if(!balances[a]) balances[a] = Array(12).fill(0); 
+                balances[a][m] = monthTotal
+                totals[m] += monthTotal
+            }
+        }
+        // Populate table
+        drawTable(balances, totals, quotes)
+    }
+
+
+
+    // Event listener for "Carica" button
+    $("#loadBalances").on("click", async function () {
+        const year = $("#yearSelector").val();
+        if (!year) {
+            return;
+        }
+       doLoad(year)
+    });
+
+
+    async function doLoad(year = new Date().getFullYear()) {
+        $(".loading").show()
+        $(".loaded").hide()
+        $("#loadBalances").attr('disabled','disabled');
+        await loadBalancesForYear(year);
+        $(".loading").hide()
+        $(".loaded").show()
+        $("#loadBalances").removeAttr('disabled');
+    }
+
+    // Initialize the page
+    initializeYearSelector();
+
+    // Initialize DataTable
+    $("#balancesTable").DataTable({
+        paging: false,
+        searching: false,
+        info: false,
+        ordering: false,
+        columns: [
+            { title: "Account" },
+            ...["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
+                "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
+                .map(month => ({ title: month, className: "text-right" }))
+        ]
+    });
+
+    const currentYear = new Date().getFullYear();
+    doLoad(currentYear)
+
+});</script>
+</body>
+</html>
