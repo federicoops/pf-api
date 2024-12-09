@@ -4,18 +4,15 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>PF: Movimentazione</title>
-        <link
-            rel="stylesheet"
-            href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
-        />
-        <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
-        />
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" />
         <link id="favicon" rel="icon" type="image/x-icon" href="./img/favicon.ico">
-
+        <script src="js/ApiClient.js"></script>
+        <script src="js/app.js"></script>
+        <script src="js/transactions.js"></script>
         <style>
             body {
                 margin: 0;
@@ -181,161 +178,5 @@
                 </div>
             </div>
         </div>
-
-        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="apiclient.js"></script>
-        <script src="index.js"></script>
-        <script>
-            $(document).ready(async function () {
-                await boot();
-
-                $.transactionsTable = $("#transactions-table").DataTable({
-                    columns: [
-                        { data: "id", visible: false }, // Hidden ID column
-                        { data: "amount" },
-                        { data: "date" },
-                        { data: "category" },
-                        { data: "account" },
-                        { data: "accountid", visible: false }, // Hidden ID column
-                        { data: "description" },
-                        {
-                            data: null,
-                            render: function (data) {
-                                return `
-                                <button class="btn btn-warning btn-sm edit-btn">Modifica</button>
-                                <button class="btn btn-danger btn-sm delete-btn">Elimina</button>
-                            `;
-                            },
-                        },
-                    ],
-                    order: [[2, "desc"]],
-                });
-
-                await onFilterClicked();
-
-                // Handle delete
-                $("#transactions-table tbody").on(
-                    "click",
-                    ".delete-btn",
-                    async function () {
-                        const row = $.transactionsTable.row(
-                            $(this).closest("tr"),
-                        );
-                        const rowData = row.data();
-                        const id = rowData.id; // Retrieve ID from hidden column
-                        if (
-                            confirm(
-                                `Sei sicuro di voler eliminare la transazione con importo ${rowData.amount}?`,
-                            )
-                        ) {
-                            try {
-                                await $.apiClient.deleteTransaction(id);
-                            } catch (error) {
-                                alert(error.message);
-                            }
-                            row.remove().draw();
-                        }
-                    },
-                );
-
-                // List transactions
-                $("#list-transactions").on("click", async function () {
-                    try {
-                        let start_date = $("#tr-start").val();
-                        let end_date = $("#tr-end").val();
-                        onFilterClicked(start_date, end_date);
-                    } catch (error) {
-                        alert(`Failed to fetch transactions: ${error.message}`);
-                    }
-                });
-
-                // Handle edit button click
-                $("#transactions-table tbody").on(
-                    "click",
-                    ".edit-btn",
-                    function () {
-                        const row = $(this).closest("tr");
-                        const rowData = $.transactionsTable.row(row).data();
-                        populateAccountDropdown("edit-conto");
-                        // Fill modal with row data
-                        $("#edit-id").val(rowData.id);
-                        $("#edit-importo").val(
-                            parseFloat(rowData.amount.replace("€", "")),
-                        );
-                        $("#edit-data").val(rowData.date);
-                        $("#edit-categoria").val(rowData.category);
-                        $("#edit-conto").val(rowData.accountid).change();
-                        $("#edit-descrizione").val(rowData.description);
-                        // Show modal
-                        const editModal = new bootstrap.Modal(
-                            document.getElementById("editModal"),
-                        );
-                        editModal.show();
-                    },
-                );
-
-                // Handle save edit
-                $("#saveEdit").on("click", async function () {
-                    const editModal = bootstrap.Modal.getInstance(
-                        document.getElementById("editModal"),
-                    );
-                    const id = $("#edit-id").val(); // Hidden ID from the modal
-                    let date = new Date($("#edit-data").val());
-                    date.setDate(date.getDate() + 1);
-                    const updatedData = {
-                        amount: $("#edit-importo").val(),
-                        date: date,
-                        category: $("#edit-categoria").val(),
-                        account: $("#edit-conto :selected").val(),
-                        description: $("#edit-descrizione").val(),
-                    };
-                    // Update in db
-                    try {
-                        await $.apiClient.updateTransaction(id, updatedData);
-                    } catch (error) {
-                        alert(error.message);
-                        editModal.hide();
-                        return;
-                    }
-                    updatedData.id = id;
-                    updatedData.accountid = $("#edit-conto :selected").val();
-                    updatedData.account = $("#edit-conto :selected").text();
-                    updatedData.date = date.toISOString().split("T")[0];
-                    // Update the corresponding row data
-                    $.transactionsTable.rows().every(function () {
-                        const rowData = this.data();
-                        if (rowData.id == id) {
-                            this.data(updatedData).draw(); // Update and redraw the row
-                        }
-                    });
-
-                    // Hide the modal
-                    editModal.hide();
-                });
-
-                $("#backup").on("click", async function () {
-                    csvContent = await $.apiClient.dump();
-
-                    // Create a Blob from the CSV content
-                    const blob = new Blob([csvContent], { type: "text/csv" });
-
-                    // Create a URL for the Blob
-                    const url = window.URL.createObjectURL(blob);
-
-                    // Create a temporary anchor element to trigger the download
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "transactions.csv"; // File name
-                    document.body.appendChild(a);
-                    a.click();
-
-                    // Clean up by revoking the Blob URL and removing the anchor
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                });
-            });
-        </script>
     </body>
 </html>

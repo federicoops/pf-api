@@ -127,7 +127,10 @@ async def dump_transactions(
     csv_writer.writeheader()
     # Iterate transactions, substitute account id with account name using the account map and write to csv
     for transaction in transactions:
-        transaction["account"] = account_map[transaction["account"]]["name"]
+        if transaction["account"] not in account_map:
+            transaction["account"] = "deleted"
+        else:
+            transaction["account"] = account_map[transaction["account"]]["name"]
         csv_writer.writerow(transaction)
 
     # Serve file
