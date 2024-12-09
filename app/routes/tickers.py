@@ -20,7 +20,9 @@ def get_price(
 
     if year is None:
         try:
-            return {'ticker':ticker, 'price': ticker_obj.fast_info['lastPrice'], 'currency': ticker_obj.fast_info['currency']}
+            prev_close = ticker_obj.fast_info["previousClose"]
+            last_price = ticker_obj.fast_info['lastPrice']
+            return {'ticker':ticker, 'price': last_price, 'currency': ticker_obj.fast_info['currency'], 'daily_yield': 100*(last_price-prev_close)/prev_close}
         except:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Ticker with name {ticker} could not be retrieved")
     else:

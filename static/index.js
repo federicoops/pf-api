@@ -12,13 +12,13 @@ async function onLoginSuccess() {
 async function refreshAccounts() {
   $.accounts = {};
   const accounts = await $.apiClient.listAccounts();
+  let totalLiq = 0;
   accounts.forEach((account) => {
     $.accounts[account._id] = account;
   });
 
-
   await fetchNetCash();
-  await fetchStockAssets(); 
+  await fetchStockAssets();
 }
 
 function updateTotalNetWorth() {
@@ -44,9 +44,11 @@ function updateTotalNetWorth() {
 function updateAccountTable() {
   if (!$.accountsTable) return;
   $.accountsTable.clear();
+  let total=0;
   for (let key in $.accounts) {
     account = $.accounts[key];
     if ("total" in account) {
+      total+=account.total
       $.accountsTable.row.add([
         account.name,
         account.total.toFixed(2) + " €",
@@ -54,12 +56,14 @@ function updateAccountTable() {
       ]);
     }
   }
+  $("#totalCash").text(total.toFixed(2) + " €")
   $.accountsTable.draw();
 }
 
 function updateStocksTable() {
   if (!$.stocksTable) return;
   $.stocksTable.clear();
+  let total = 0
   for (let key in $.stocks) {
     stock = $.stocks[key];
     current_value =
@@ -73,6 +77,7 @@ function updateStocksTable() {
         ($.stocks[stock._id].current_value / stock.total_wfee - 1) * 100;
       direction = current_yield >= 0 ? "+" : "";
       current_yield = direction + current_yield.toFixed(2) + "%";
+      total+=$.stocks[stock._id].current_value
     }
     $.stocksTable.row.add([
       stock._id,
@@ -83,6 +88,7 @@ function updateStocksTable() {
       current_yield,
     ]);
   }
+  $("#totalInv").text(total.toFixed(2) + " €")
   $.stocksTable.draw();
 }
 
@@ -107,7 +113,7 @@ async function fetchNetCash() {
   const categories = await $.apiClient.aggregateTransactions(
     getStartOfTime(),
     getToday(),
-    "category"   
+    "category"
   )
 
   categories.forEach((category) => {
@@ -120,6 +126,8 @@ async function fetchNetCash() {
     getToday(),
     "account",
   );
+
+
   cashNet.forEach((accountNet) => {
     if (accountNet._id in $.accounts) {
       const account = $.accounts[accountNet._id];
