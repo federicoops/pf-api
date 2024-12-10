@@ -21,6 +21,19 @@
             #transactions-section {
                 width: 100%;
             }
+
+            @media (max-width: 768px) {
+            table {
+                width: 100%;
+            }
+            th, td {
+                white-space: nowrap;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+        }
         </style>
     </head>
     <body>
@@ -56,7 +69,7 @@
                     Filtra
                 </button>
             </div>
-            <div>
+            <div class="table-wrapper">
                 <table
                     id="transactions-table"
                     class="table table-striped"

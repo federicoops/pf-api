@@ -16,7 +16,11 @@ const appState = new AppState();
 const Utils = {
   formatCurrency: (value) => `${value.toFixed(2)} €`,
   formatDate: (date) => new Date(date).toISOString().split("T")[0],
-  getToday: () => new Date().toISOString().split("T")[0],
+  getToday: () => {
+    const today = new Date();
+    today.setDate(today.getDate() + 1); // Increment day by 1
+    return today.toISOString().split("T")[0];
+  },
   getStartOfTime: () => new Date(1900, 0, 2).toISOString().split("T")[0],
 };
 
@@ -90,18 +94,18 @@ class StockManager {
 
     appState.stocksTable.clear();
     let total = 0;
-
+    let totalInvested = 0;
     Object.values(appState.stocks).forEach((stock) => {
       const current_value = stock.current_value
         ? Utils.formatCurrency(stock.current_value)
         : null;
       const price = stock.price ? Utils.formatCurrency(stock.price) : null;
       const current_yield = stock.current_value
-        ? `${((stock.current_value / stock.total_wfee - 1) * 100).toFixed(2)}%`
+        ? `+${((stock.current_value / stock.total_wfee - 1) * 100).toFixed(2)}%`
         : "N/A";
 
       total += stock.current_value || 0;
-
+      totalInvested += stock.total_wfee;
       appState.stocksTable.row.add([
         stock._id,
         stock.quantity,
@@ -112,7 +116,8 @@ class StockManager {
       ]);
     });
 
-    $("#totalInv").text(Utils.formatCurrency(total));
+    $("#currentTotal").text(Utils.formatCurrency(total));
+    $("#totalInv").text(`(+${(100*(total/totalInvested-1)).toFixed(2)}%)`);
     appState.stocksTable.draw();
   }
 }

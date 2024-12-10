@@ -31,8 +31,8 @@ $(document).ready(async function () {
         $(yieldRowNode).addClass("table-success").css("font-weight", "bold");
 
         Object.entries(balances).forEach(([account, months]) => {
-            if (!$.accounts[account]) return;
-            const rowData = [$.accounts[account].name, ...months.map(amount => `${amount.toFixed(2)} €`)];
+            if (!appState.accounts[account]) return;
+            const rowData = [appState.accounts[account].name, ...months.map(amount => `${amount.toFixed(2)} €`)];
             table.row.add(rowData); // Add new rows
         });
 
@@ -67,11 +67,11 @@ $(document).ready(async function () {
         let totals = Array(12).fill(0); // Initialize totals for each month
         let tickers = new Set()
         for (let month = 1; month <= 12; month++) {
-            const startDate = getStartOfTime();
+            const startDate = Utils.getStartOfTime();
             const startOfMonth = new Date(year, month-1, 0).toISOString().split('T')[0];
             const endDate = new Date(year, month, 0).toISOString().split('T')[0];
-            let monthlyData = await $.apiClient.aggregateTransactions(startDate, endDate, "account");
-            let monthlyInvestments = await $.apiClient.listInvestments(startOfMonth, endDate)
+            let monthlyData = await appState.apiClient.aggregateTransactions(startDate, endDate, "account");
+            let monthlyInvestments = await appState.apiClient.listInvestments(startOfMonth, endDate)
 
             aggregateInvestments(monthlyInvestments, quotes, month, tickers)
 
@@ -89,7 +89,7 @@ $(document).ready(async function () {
 
         const tickerArr = Array.from(tickers)
         let cachedPrices = undefined;
-        if(tickerArr.length > 0) cachedPrices = await $.apiClient.getTickerPrice(tickerArr.join(','), year)
+        if(tickerArr.length > 0) cachedPrices = await appState.apiClient.getTickerPrice(tickerArr.join(','), year)
 
         for(a in quotes) {
             let account = quotes[a]

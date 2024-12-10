@@ -1,11 +1,12 @@
 $(document).ready(async function () {
     await boot()
-    $.transactionData = await $.apiClient.getOverview(2024)
+    const currentYear = new Date()
+    let transactionData = await appState.apiClient.getOverview(currentYear.getFullYear())
  
     // Transform data into a pivot table format
     const pivotData = {};
     const monthlyTotals = Array(12).fill(0);
-    $.transactionData.forEach(({ _id, total }) => {
+    transactionData.forEach(({ _id, total }) => {
         if(_id.category == "Trasferimento" || _id.category == "Investimento") return;
         if(total > 0) return;
         if (!pivotData[_id.category]) pivotData[_id.category] = Array(12).fill(0);
@@ -69,7 +70,7 @@ $(document).ready(async function () {
     // Function to get the total actual expenses/incomes for the current month
     const getActualTotalForCurrentMonth = (filter) => {
         const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed
-        return $.transactionData
+        return transactionData
             .filter(transaction => filter(transaction))
             .reduce((sum, transaction) => sum + transaction.total, 0);
     };
