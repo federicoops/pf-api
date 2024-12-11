@@ -1,3 +1,4 @@
-./pfapi/
-./env
+pfapi/
+env
 **/__pycache__/
+bot/

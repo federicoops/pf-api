@@ -3,3 +3,4 @@ pfapi/
 *.csv
 .DS_Store
 .env
+bot/.bot.env
