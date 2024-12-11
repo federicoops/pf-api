@@ -15,6 +15,10 @@ const appState = new AppState();
 
 const Utils = {
   formatCurrency: (value) => `${value.toFixed(2)} €`,
+  formatYield: (value) => {
+    let direction = (value>=0)? "+":"";
+    return `${direction}${value.toFixed(2)} %`
+  },
   formatDate: (date) => new Date(date).toISOString().split("T")[0],
   getToday: () => {
     const today = new Date();
@@ -79,6 +83,7 @@ class StockManager {
           const stockData = appState.stocks[stock._id];
           stockData.price = data.price;
           stockData.current_value = data.price * stockData.quantity;
+          stockData.daily_yield = data.daily_yield
           UIManager.refresh();
         });
       });
@@ -99,11 +104,10 @@ class StockManager {
       const current_value = stock.current_value
         ? Utils.formatCurrency(stock.current_value)
         : null;
-      const price = stock.price ? Utils.formatCurrency(stock.price) : null;
+      const price = stock.price ? `${Utils.formatCurrency(stock.price)} (${Utils.formatYield(stock.daily_yield)})` : null;
       const current_yield = stock.current_value
         ? `+${((stock.current_value / stock.total_wfee - 1) * 100).toFixed(2)}%`
         : "N/A";
-
       total += stock.current_value || 0;
       totalInvested += stock.total_wfee;
       appState.stocksTable.row.add([
@@ -119,6 +123,38 @@ class StockManager {
     $("#currentTotal").text(Utils.formatCurrency(total));
     $("#totalInv").text(`(+${(100*(total/totalInvested-1)).toFixed(2)}%)`);
     appState.stocksTable.draw();
+  }
+
+  static updateStocksTableWeighted() {
+    if(!appState.weightedStocksTable) return;
+    appState.weightedStocksTable.clear();
+    let total = 0;
+    let totalInvested = 0;
+
+    Object.values(appState.stocks).forEach((stock) => {
+      total += stock.current_value || 0;
+      totalInvested += stock.total_wfee;
+    });
+
+    Object.values(appState.stocks).forEach((stock) => {
+      const current_value = stock.current_value
+        ? Utils.formatCurrency(stock.current_value)
+        : null;
+      const current_weight = stock.current_value
+        ? `${((stock.current_value / total) * 100).toFixed(2)}%`
+        : "N/A";
+
+      appState.weightedStocksTable.row.add([
+        stock._id,
+        stock.quantity,
+        current_value,
+        current_weight,
+      ]);
+    });
+
+    $("#currentTotal").text(Utils.formatCurrency(total));
+    $("#totalInv").text(`(+${(100*(total/totalInvested-1)).toFixed(2)}%)`);
+    appState.weightedStocksTable.draw();
   }
 }
 
@@ -173,10 +209,22 @@ class NetManager {
 }
 
 class UIManager {
+
+  static menuItems = [
+    { href: "./", label: "Home" },
+    { href: "./new.html", label: "Nuovo movimento" },
+    { href: "./transactions.html", label: "Tutti i movimenti" },
+    { href: "./expenses.html", label: "Dettaglio spese" },
+    { href: "./accounts.html", label: "Conti" },
+    { href: "./year.html", label: "Vista anno" },
+    { href: "./inv.html", label: "Investimenti" },
+  ];
+
   static refresh() {
     AccountManager.updateAccountTable();
     StockManager.updateStocksTable();
     NetManager.updateTotalNetWorth();
+    StockManager.updateStocksTableWeighted()
   }
 
   static populateDropdown(selector, items, defaultOption) {
@@ -186,6 +234,18 @@ class UIManager {
     for(let item in items) {
       dropdown.append(`<option value="${item}">${items[item].name}</option>`);
     }
+  }
+
+  static generateMenu() {
+    const currentPage = window.location.pathname.split("/").pop();
+    console.log(this.menuItems)
+    this.menuItems.forEach(item => {
+      const menuItem = $(`<a href="${item.href}" class="btn btn-light show-after-login">${item.label}</a>`);
+      if (item.href.split("/").pop() === currentPage) {
+          menuItem.removeClass('btn-light').addClass('btn-primary');
+      }
+      $("#menu").append(menuItem);
+    });
   }
 }
 
@@ -239,6 +299,7 @@ async function boot() {
     try {
       const me = await appState.apiClient.getMe();
       await onLoginSuccess();
+      UIManager.generateMenu()
     } catch (error) {
       appState.apiClient.accessToken = null;
       window.localStorage.removeItem("token");
