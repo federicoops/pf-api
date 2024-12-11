@@ -107,8 +107,21 @@ $(document).ready(async function () {
         }
         // Populate table
         drawTable(balances, totals, quotes)
+
+        // Plot totals
+        plotTotals(balances, totals, quotes)
     }
 
+
+    function plotTotals(balances, totals, quotes) {
+        let serie = []
+        for(point in totals) {
+            dataPoint = [parseInt(point)+1, totals[point]]
+            console.log(dataPoint)
+            serie.push(dataPoint)
+        }
+        $.plot("#placeholder", [serie ]);
+    }
 
 
     // Event listener for "Carica" button
@@ -133,7 +146,6 @@ $(document).ready(async function () {
 
     // Initialize the page
     initializeYearSelector();
-
     // Initialize DataTable
     $("#balancesTable").DataTable({
         paging: false,
