@@ -10,7 +10,6 @@ from bson import ObjectId
 from fastapi.responses import StreamingResponse
 import csv
 from io import StringIO
-import yfinance as yf
 
 
 router = APIRouter(prefix="/api/transactions")
@@ -30,8 +29,8 @@ async def list_transactions(
     if investment:
         match["$match"]["ticker"] = {"$exists": True}
     pipeline = [
-        match, 
-        {"$sort": {"date": -1}}   
+        match,
+        {"$sort": {"date": -1}}
     ]
     transactions = list(request.app.db["transactions"].aggregate(pipeline))
     return transactions

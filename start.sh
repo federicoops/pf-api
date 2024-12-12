@@ -24,7 +24,7 @@ docker run -d \
 docker build -t pf-api .
 
 # Step 5: Run the pf-api container
-docker run -d  \
+docker run  \
   --rm \
   --name pf-api \
   --network pf-network \

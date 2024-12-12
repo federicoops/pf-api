@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 from app.model.auth import User, Token, TokenData
 import os
-from dotenv import dotenv_values 
+from dotenv import dotenv_values
 
 
 config = dotenv_values("./env/.env")
@@ -32,7 +32,6 @@ def get_password_hash(password):
 
 def get_user(db, username: str):
     user = db['users'].find_one({"username": username})
-    print(user)
     return User(username=user['username'], password=user['password'])
 
 
@@ -62,7 +61,6 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], reques
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    print(request.app.db)
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
