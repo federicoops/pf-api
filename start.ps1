@@ -26,7 +26,7 @@ docker build -t pf-api .
 
 # Step 5: Run the pf-api container
 docker run `
-  --rm `
+  --rm -d `
   --name pf-api `
   --network pf-network `
   -p 8000:8000 `
