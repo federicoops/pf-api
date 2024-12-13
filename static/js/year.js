@@ -24,11 +24,13 @@ $(document).ready(async function () {
       "Totale",
       ...totals.map((total) => `${total.toFixed(2)} €`),
     ];
+    
     const yields = totals
       .slice(1)
       .map((current, i) =>
-        totals[i] !== 0 ? ((current - totals[0]) / totals[0]) * 100 : null,
+        totals[i] !== 0 ? ((current - totals[0]) / totals[0]) * 100 : 0,
       );
+    
     const yieldRowData = [
       "Yield",
       "-",
@@ -176,7 +178,7 @@ $(document).ready(async function () {
         ticks: serie.map(([x, _]) => [x, monthNames[x - 1]]), // Map x-values to abbreviated month names
       },
       yaxis: {
-        tickFormatter: (val) => `${val} €`, // Add € symbol to y-axis
+        tickFormatter: (val) => `${val.toFixed(0)} €`, // Add € symbol to y-axis
       },
       series: {
         lines: {

@@ -36,7 +36,6 @@ class AccountManager {
         acc[account._id] = account;
         return acc;
       }, {});
-
       await NetManager.fetchNetCash();
       await StockManager.fetchStockAssets();
     } catch (error) {
@@ -46,10 +45,8 @@ class AccountManager {
 
   static updateAccountTable() {
     if (!appState.accountsTable) return;
-
     appState.accountsTable.clear();
     let total = 0;
-
     Object.values(appState.accounts).forEach((account) => {
       if ("total" in account && account.total.toFixed(2)>0) {
         total += account.total;
@@ -121,7 +118,8 @@ class StockManager {
     });
 
     $("#currentTotal").text(Utils.formatCurrency(total));
-    $("#totalInv").text(`(+${(100*(total/totalInvested-1)).toFixed(2)}%)`);
+    if(totalInvested)
+      $("#totalInv").text(`(+${(100*(total/totalInvested-1)).toFixed(2)}%)`);
     appState.stocksTable.draw();
   }
 
@@ -153,7 +151,9 @@ class StockManager {
     });
 
     $("#currentTotal").text(Utils.formatCurrency(total));
-    $("#totalInv").text(`(+${(100*(total/totalInvested-1)).toFixed(2)}%)`);
+
+    if(totalInvested)  
+      $("#totalInv").text(`(+${(100*(total/totalInvested-1)).toFixed(2)}%)`);
     appState.weightedStocksTable.draw();
   }
 }
@@ -167,6 +167,7 @@ class NetManager {
         "account"
       );
 
+
       const categories = await appState.apiClient.aggregateTransactions(
         Utils.getStartOfTime(),
         Utils.getToday(),
@@ -179,6 +180,7 @@ class NetManager {
 
       cashNet.forEach((accountNet) => {
         if (appState.accounts[accountNet._id]) {
+
           appState.accounts[accountNet._id].total = accountNet.total;
         }
       });
@@ -221,6 +223,7 @@ class UIManager {
   ];
 
   static refresh() {
+
     AccountManager.updateAccountTable();
     StockManager.updateStocksTable();
     NetManager.updateTotalNetWorth();

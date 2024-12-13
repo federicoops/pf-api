@@ -11,7 +11,7 @@ $(document).ready(async function () {
     
     appState.stocksTable = $("#stocks-table").DataTable(simpleTable);
     appState.accountsTable = $("#accounts-table").DataTable(simpleTable);
-    
+    UIManager.refresh()
     // Login form submission
     $("#login-form").on("submit", async function (e) {
         e.preventDefault();

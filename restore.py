@@ -51,7 +51,7 @@ def populate(transaction_file):
 
     db.drop_collection("transactions")
     db.drop_collection("accounts")
-
+    
     # Retrieve account id from account_name using cached or stored accounts
     def retrieve_account(account_name):
         if account_name in account_cache:
