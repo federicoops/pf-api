@@ -122,11 +122,13 @@ $(document).ready(async function () {
         year,
       );
 
+    let totalInvested = {}
     for (a in quotes) {
       let account = quotes[a];
       for (m in account) {
         let month = account[m];
         let monthTotal = 0;
+        if(!(m in totalInvested)) totalInvested[m] = 0
         for (ticker in month) {
           let price = cachedPrices[m][tickerArr.indexOf(ticker)];
           monthTotal += price * month[ticker];
@@ -134,20 +136,22 @@ $(document).ready(async function () {
         if (!balances[a]) balances[a] = Array(12).fill(0);
         balances[a][m] = monthTotal;
         totals[m] += monthTotal;
+        totalInvested[m] += monthTotal
       }
     }
+
     // Populate table
     drawTable(balances, totals, quotes);
 
     // Plot totals
-    plotTotals(balances, totals, quotes);
+    plotAmounts(totals, '#total-holder', `${year}: Patrimonio nel tempo`);
+    plotAmounts(totalInvested, '#inv-holder', `${year}: Investimenti nel tempo`)
   }
 
-  function plotTotals(balances, totals, quotes) {
+  function plotAmounts(amounts, selector, caption) {
     let serie = [];
-    for (let point in totals) {
-      let dataPoint = [parseInt(point) + 1, totals[point]];
-      console.log(dataPoint);
+    for (let point in amounts) {
+      let dataPoint = [parseInt(point) + 1, amounts[point]];
       serie.push(dataPoint);
     }
 
@@ -197,11 +201,11 @@ $(document).ready(async function () {
 
     // Render the plot
     $.plot(
-      "#placeholder",
+      selector,
       [
         {
           data: serie,
-          label: `${$("#yearSelector").val()}: patrimonio nel tempo`,
+          label: caption,
         },
       ],
       options,
@@ -219,7 +223,7 @@ $(document).ready(async function () {
       })
       .appendTo("body");
 
-    $("#placeholder").bind("plothover", function (event, pos, item) {
+    $(selector).bind("plothover", function (event, pos, item) {
       if (item) {
         const x = monthNames[item.datapoint[0] - 1]; // Get the abbreviated month name
         const y = item.datapoint[1].toFixed(2); // Format the y-value

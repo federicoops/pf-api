@@ -238,7 +238,6 @@ class UIManager {
 
   static generateMenu() {
     const currentPage = window.location.pathname.split("/").pop();
-    console.log(this.menuItems)
     this.menuItems.forEach(item => {
       const menuItem = $(`<a href="${item.href}" class="btn btn-light show-after-login">${item.label}</a>`);
       if (item.href.split("/").pop() === currentPage) {
@@ -260,6 +259,7 @@ async function onLoginSuccess() {
     );
 
     await AccountManager.refreshAccounts();
+    UIManager.generateMenu()
 
     $(".show-after-login").show();
   } catch (error) {
@@ -299,7 +299,6 @@ async function boot() {
     try {
       const me = await appState.apiClient.getMe();
       await onLoginSuccess();
-      UIManager.generateMenu()
     } catch (error) {
       appState.apiClient.accessToken = null;
       window.localStorage.removeItem("token");
