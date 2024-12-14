@@ -1,0 +1,59 @@
+body.full {
+    margin: 0;
+    padding: 0;
+}
+#transactions-section {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    table {
+        width: 100%;
+    }
+    th, td {
+        white-space: nowrap;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .plot-container {
+        width:100%;
+        padding-bottom: 20px;
+    }
+}
+
+.text-right {
+    text-align: right;
+}
+
+.plot-container {
+    box-sizing: border-box;
+    width: 850px;
+    height: 450px;
+    padding: 20px 15px 15px 15px;
+    margin: 15px auto 30px auto;
+    border: 1px solid #ddd;
+    background: #fff;
+    user-select: none;
+}
+
+.plot-placeholder {
+    width: 100%;
+    height: 100%;
+    font-size: 14px;
+}
+.legend > svg > rect.background {
+    opacity:0;
+}
+
+.logoheader {
+    display: flex;
+    align-items: center ;
+}
+.logoheader img {
+    width: 64px;
+    height: 64px;
+    border: none;
+}

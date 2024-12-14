@@ -13,28 +13,7 @@
     <script src="js/ApiClient.js"></script>
     <script src="js/app.js"></script>
     <script src="js/expenses.js"></script>
-    <style>
-        .text-right {
-            text-align: right;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        @media (max-width: 768px) {
-            table {
-                width: 100%;
-            }
-            th, td {
-                white-space: nowrap;
-            }
-
-            .table-wrapper {
-                overflow-x: auto;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div id="content" class="container-fluid mt-5">
@@ -79,18 +58,18 @@
                             <button type="submit" class="btn btn-primary">Aggiungi ricorrente</button>
                         </form>
     
-                        <table class="table " id="plannedExpensesTable">
-                            <thead>
-                                <tr>
-                                    <th>Categoria</th>
-                                    <th>Importo</th>
-                                    <th>Azioni</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Planned expenses will be dynamically populated here -->
-                            </tbody>
-                        </table>
+                            <table class="table " id="plannedExpensesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Categoria</th>
+                                        <th>Importo</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Planned expenses will be dynamically populated here -->
+                                </tbody>
+                            </table>
                     </div>
                 </div>
 

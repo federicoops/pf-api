@@ -48,7 +48,7 @@ class AccountManager {
     appState.accountsTable.clear();
     let total = 0;
     Object.values(appState.accounts).forEach((account) => {
-      if ("total" in account && account.total.toFixed(2)>0) {
+      if ("total" in account && account.total.toFixed(2) != 0) {
         total += account.total;
         appState.accountsTable.row.add([
           account.name,
