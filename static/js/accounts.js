@@ -7,8 +7,9 @@ $(document).ready(async function () {
             { data: "id", visible: false},
             { data: "name" },
             { data: "balance" },
+            { data: "info"}, 
             { data: "type" },
-            {
+            { 
             data: null,
             orderable: false,
             render: function (data, type, row) {
@@ -37,6 +38,7 @@ $(document).ready(async function () {
                     id: account._id,
                     name: account.name,
                     type: account.asset_type,
+                    info: account.info,
                     balance: total.toFixed(2)+" €"
                 });                    
             });
@@ -90,6 +92,7 @@ $(document).ready(async function () {
         $("#editAccountId").val(rowData.id);
         $("#editAccountName").val(rowData.name);
         $("#editAccountType").val(rowData.type);
+        $("#editAccountInfo").val(rowData.info);
         $("#editAccountModal").modal("show");
     });
 
@@ -99,9 +102,9 @@ $(document).ready(async function () {
         const id = $("#editAccountId").val();
         const name = $("#editAccountName").val();
         const asset_type = $("#editAccountType").val();
-
+        const info = $("#editAccountInfo").val()
         try {
-            await appState.apiClient.updateAccount(id, { name, asset_type });
+            await appState.apiClient.updateAccount(id, { name, asset_type, info });
             $("#editAccountModal").modal("hide");
             await loadAccounts();
         } catch (error) {

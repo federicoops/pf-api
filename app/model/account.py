@@ -11,7 +11,9 @@ class Account(BaseModel):
     id: PyObjectId = Field(default_factory=uuid.uuid4, alias="_id")
     name: str   # Mandatory field for name
     asset_type: Optional[str] = None # Optional asset type (e.g. cash, stocks/etf, crypto, house, car etc etc)
+    info: Optional[str] = None # Other metadata about account (e.g. IBAN/SWIFT, account number etc etc etc)
 
 class AccountUpdate(BaseModel):
     name: Optional[str] = None  # Optional field for name
     asset_type: Optional[str] = None # Optional asset type (e.g. cash, stocks/etf, crypto, house, car etc etc)
+    info: Optional[str] = None # Other metadata about account (e.g. IBAN/SWIFT, account number etc etc etc)
