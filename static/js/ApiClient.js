@@ -109,11 +109,12 @@ class ApiClient {
       return this.request(`/api/transactions/${id}`, "DELETE");
     }
   
-    async aggregateTransactions(startDate, endDate, aggregateType) {
+    async aggregateTransactions(startDate, endDate, aggregateType, investment = false) {
       return this.request("/api/transactions/aggregate", "GET", null, {
         start_date: startDate,
         end_date: endDate,
         aggregate: aggregateType,
+        investment: investment
       });
     }
   

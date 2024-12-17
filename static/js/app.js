@@ -2,6 +2,7 @@ class AppState {
   constructor() {
     this.accounts = {};
     this.stocks = {};
+    this.brokers = {};
     this.transactions = {};
     this.categories = [];
     this.accountsTable = null;
@@ -70,9 +71,24 @@ class StockManager {
       const stockAssets = await appState.apiClient.aggregateTransactions(
         today,
         today,
-        "ticker"
+        "ticker",
+        true
       );
 
+      const investments = await appState.apiClient.listInvestments(Utils.getStartOfTime(), Utils.getToday());
+
+      investments.forEach((investment) => {
+        if(!(investment.account in appState.brokers)) 
+          appState.brokers[investment.account] = {
+            account: investment.account, 
+            tickers: [], 
+            liquidity: appState.accounts[investment.account].total
+          }
+        
+          appState.brokers[investment.account].tickers.push({ticker: investment.ticker, quantity: investment.quantity})
+        
+
+      })
       stockAssets.forEach((stock) => {
         appState.stocks[stock._id] = stock;
 
@@ -90,6 +106,28 @@ class StockManager {
       console.error("Error fetching stock assets:", error);
     }
   }
+
+  static updateBrokersTable() {
+    if(!appState.brokersTable) return;
+    appState.brokersTable.clear();
+    Object.values(appState.brokers).forEach((broker) => {
+      let broker_value = 0;
+      broker.tickers.forEach((stock) => {
+        let stockData = appState.stocks[stock.ticker]
+        broker_value+=stockData.price*stock.quantity
+      })
+
+      appState.brokersTable.row.add([
+        appState.accounts[broker.account].name,
+        Utils.formatCurrency(broker_value || 0),
+        Utils.formatCurrency(broker.liquidity || 0),
+        (broker.liquidity>broker_value*2/1000)? "OK": "Poca liquiditá "
+      ])
+
+    })
+    appState.brokersTable.draw()
+  }
+
 
   static updateStocksTable() {
     if (!appState.stocksTable) return;
@@ -150,10 +188,6 @@ class StockManager {
       ]);
     });
 
-    $("#currentTotal").text(Utils.formatCurrency(total));
-
-    if(totalInvested)  
-      $("#totalInv").text(`(+${(100*(total/totalInvested-1)).toFixed(2)}%)`);
     appState.weightedStocksTable.draw();
   }
 }
@@ -205,7 +239,7 @@ class NetManager {
     const totalNetWorth = totalNet + totalStocks;
 
     $("#total-net-worth").text(
-      `Patrimonio attuale: ${Utils.formatCurrency(totalNetWorth)}`
+      `${Utils.formatCurrency(totalNetWorth)}`
     );
   }
 }
@@ -223,11 +257,11 @@ class UIManager {
   ];
 
   static refresh() {
-
     AccountManager.updateAccountTable();
     StockManager.updateStocksTable();
     NetManager.updateTotalNetWorth();
     StockManager.updateStocksTableWeighted()
+    StockManager.updateBrokersTable()
   }
 
   static populateDropdown(selector, items, defaultOption) {
@@ -258,7 +292,7 @@ async function onLoginSuccess() {
     $(".hide-after-login").hide();
 
     $("#login-feedback").html(
-      `<div class="alert alert-success">Ciao, <b>${user.username}</b><div id="total-net-worth"></div></div>`
+      `<div class="alert alert-success">Ciao, <b>${user.username}</b><div>Patrimonio attuale: <span class="blur" id="total-net-worth"></span></div></div>`
     );
 
     await AccountManager.refreshAccounts();

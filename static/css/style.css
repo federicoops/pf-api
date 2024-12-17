@@ -25,7 +25,7 @@ body.full {
 }
 
 .text-right {
-    text-align: right;
+    text-align: right !important;
 }
 
 .plot-container {
@@ -57,3 +57,13 @@ body.full {
     height: 64px;
     border: none;
 }
+
+.blur {
+    color: transparent;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+ }
+
+ .blur:hover {
+    color:black;
+    text-shadow: none;
+ }

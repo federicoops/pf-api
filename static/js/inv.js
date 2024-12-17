@@ -23,10 +23,11 @@ $(document).ready(async function () {
         "bFilter": false,
         "bInfo": false,
         "bAutoWidth": false,
-        order: [[3, 'desc']]
+       
     }
     
-    appState.weightedStocksTable = $("#stocks-table").DataTable(simpleTable);
+    appState.weightedStocksTable = $("#stocks-table").DataTable({...simpleTable,  order: [[3, 'desc']]});
+    appState.brokersTable = $("#brokers-table").DataTable({...simpleTable,  order: [[1, 'desc']]});
 
     $("#investment-plan").on("submit", async function (e) {
         e.preventDefault()
@@ -52,4 +53,7 @@ $(document).ready(async function () {
         }
         UIManager.refresh()
     });
+
+
+
 });

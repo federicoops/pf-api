@@ -43,12 +43,13 @@ async def aggregate_transactions(
     current_user: Annotated[User, Depends(get_current_active_user)],
     start_date: datetime = datetime.today().replace(day=1),
     end_date: datetime = datetime.today(),
-    aggregate: str = ""):
+    aggregate: str = "",
+    investment: bool = False):
 
     if aggregate is None or aggregate not in ["ticker", "category", "account"]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Aggregation group not specified or invalid")
 
-    if aggregate != "ticker":
+    if not investment:
 
         pipeline = [
             {"$match": {"date": {"$gte": start_date, "$lte": end_date}, "price":{"$exists": False}}},  # Filter by date range, exclude etf/stocks buying
@@ -57,7 +58,7 @@ async def aggregate_transactions(
     else:
         pipeline = [
             {"$match": {"ticker":{"$exists": True}, "quantity":{"$exists": True} }},
-            {"$group": {"_id": "$ticker",
+            {"$group": {"_id": f"${aggregate}",
                         "quantity": {"$sum": "$quantity"},
                         "total_wfee": {"$sum": "$amount"} ,
                         "total":{ "$sum": { "$multiply": [ "$price", "$quantity" ] }}
