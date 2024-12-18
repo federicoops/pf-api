@@ -5,12 +5,23 @@ $(document).ready(async function () {
         "bLengthChange": false,
         "bFilter": false,
         "bInfo": false,
-        "bAutoWidth": false,
-        order: [[1, 'desc']]
+        order: [[1, 'desc']],
     }
+
+    const logoCoumns = {columns:[
+        {
+            data: "name",
+            render: function (data, type, row) {
+                const imgUrl = appState.accountLogos[data] || "img/icon.webp";
+                return `<img class="img-thumbnail" src="${imgUrl}" " style="width: 35px; height: 35px; object-fit: contain; padding: 0;"> ${data}`;
+            }
+        },
+        { data: "balance" },
+        { data: "type" }
+    ]}
     
     appState.stocksTable = $("#stocks-table").DataTable(simpleTable);
-    appState.accountsTable = $("#accounts-table").DataTable(simpleTable);
+    appState.accountsTable = $("#accounts-table").DataTable({...simpleTable, ...logoCoumns});
     UIManager.refresh()
     // Login form submission
     $("#login-form").on("submit", async function (e) {

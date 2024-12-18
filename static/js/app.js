@@ -9,6 +9,18 @@ class AppState {
     this.stocksTable = null;
     this.transactionsTable = null;
     this.apiClient = null;
+    this.accountLogos = {
+      'FindomesticCC': './img/account-logos/findomestic.png',
+      'FindomesticCD': './img/account-logos/findomestic.png',
+      'Revolut': './img/account-logos/revolut.jpg',
+      'Moneyfarm': './img/account-logos/moneyfarm.jpeg',
+      'Paypal': './img/account-logos/paypal.webp',
+      'Directa' : './img/account-logos/directa.png',
+      'Isybank': './img/account-logos/isybank.jpg',
+      'CAAutoBank': './img/account-logos/caautobank.png',
+      'CartaYOU': './img/account-logos/advanzia.jpeg',
+      'Wise': './img/account-logos/wise.png',
+    }
   }
 }
 
@@ -51,11 +63,12 @@ class AccountManager {
     Object.values(appState.accounts).forEach((account) => {
       if ("total" in account && account.total.toFixed(2) != 0) {
         total += account.total;
-        appState.accountsTable.row.add([
-          account.name,
-          Utils.formatCurrency(account.total),
-          account.asset_type,
-        ]);
+        appState.accountsTable.row.add(
+          {
+            name: account.name,
+            balance: Utils.formatCurrency(account.total),
+            type:account.asset_type
+          });
       }
     });
 
