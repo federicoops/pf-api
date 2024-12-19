@@ -13,7 +13,7 @@ $(document).ready(async function () {
             data: "name",
             render: function (data, type, row) {
                 const imgUrl = appState.accountLogos[data] || "img/icon.webp";
-                return `<img class="img-thumbnail" src="${imgUrl}" " style="width: 35px; height: 35px; object-fit: contain; padding: 0;"> ${data}`;
+                return `<div><img class="hide-on-mobile img-thumbnail" src="${imgUrl}" " style="width: 35px; height: 35px; object-fit: contain; padding: 0;"> ${data}</div>`;
             }
         },
         { data: "balance" },

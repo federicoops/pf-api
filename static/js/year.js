@@ -265,6 +265,7 @@ $(document).ready(async function () {
     paging: false,
     searching: false,
     info: false,
+    autoWidth: false,
     ordering: false,
     columns: [
       { title: "Account" },
