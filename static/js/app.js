@@ -36,7 +36,7 @@ class AppState {
 const appState = new AppState();
 
 const Utils = {
-  formatCurrency: (value) => `${value.toFixed(2)} €`,
+  formatCurrency: (value) => `${value.toFixed(2)}<i class="bi bi-currency-euro"></i>`,
   formatYield: (value) => {
     let direction = value >= 0 ? "+" : "";
     return `${direction}${value.toFixed(2)} %`;
@@ -100,8 +100,8 @@ class AccountManager {
       }
     });
 
-    $("#totalCash").text(Utils.formatCurrency(totalCash));
-    $("#totalDebt").text(Utils.formatCurrency(totalDebt));
+    $("#totalCash").html(Utils.formatCurrency(totalCash));
+    $("#totalDebt").html(Utils.formatCurrency(totalDebt));
     appState.accountsTable["liq"].draw();
     appState.accountsTable["deb"].draw();
   }
@@ -202,9 +202,9 @@ class StockManager {
       ]);
     });
 
-    $("#currentTotal").text(Utils.formatCurrency(total));
+    $("#currentTotal").html(Utils.formatCurrency(total));
     if (totalInvested)
-      $("#totalInv").text(
+      $("#totalInv").html(
         `(+${(100 * (total / totalInvested - 1)).toFixed(2)}%)`,
       );
     appState.stocksTable.draw();
@@ -285,19 +285,19 @@ class NetManager {
 
     const totalNetWorth = totalNet + totalStocks;
 
-    $("#total-net-worth").text(`${Utils.formatCurrency(totalNetWorth)}`);
+    $("#total-net-worth").html(`${Utils.formatCurrency(totalNetWorth)}`);
   }
 }
 
 class UIManager {
   static menuItems = [
-    { href: "./", label: "Home" },
-    { href: "./new.html", label: "Nuovo movimento" },
-    { href: "./transactions.html", label: "Tutti i movimenti" },
-    { href: "./expenses.html", label: "Dettaglio spese" },
-    { href: "./accounts.html", label: "Conti" },
-    { href: "./year.html", label: "Vista anno" },
-    { href: "./inv.html", label: "Investimenti" },
+    { href: "./", label: "Home", icon: "bi-house" },
+    { href: "./new.html", label: "Nuovo movimento", icon: "bi-journal-plus" },
+    { href: "./transactions.html", label: "Tutti i movimenti", icon: "bi-list-columns" },
+    { href: "./expenses.html", label: "Dettaglio spese", icon: "bi-cash-stack" },
+    { href: "./accounts.html", label: "Conti", icon: "bi-bank" },
+    { href: "./year.html", label: "Vista anno", icon: "bi-calendar" },
+    { href: "./inv.html", label: "Investimenti", icon: "bi-graph-up" },
   ];
 
   static refresh() {
@@ -323,7 +323,7 @@ class UIManager {
     const currentPage = window.location.pathname.split("/").pop();
     this.menuItems.forEach((item) => {
       const menuItem = $(
-        `<a href="${item.href}" class="btn btn-light show-after-login">${item.label}</a>`,
+        `<a href="${item.href}" class="btn btn-light show-after-login flex-fill"><i class="bi ${item.icon}"></i> ${item.label}</a>`,
       );
       if (item.href.split("/").pop() === currentPage) {
         menuItem.removeClass("btn-light").addClass("btn-primary");
@@ -339,7 +339,7 @@ async function onLoginSuccess() {
     $(".hide-after-login").hide();
 
     $("#login-feedback").html(
-      `<div class="alert alert-success">Ciao, <b>${user.username}</b><div>Patrimonio attuale: <span class="blur" id="total-net-worth"></span></div></div>`,
+      `<div class="alert alert-primary">Ciao, <b>${user.username}</b><div>Patrimonio attuale: <span class="blur" id="total-net-worth"></span></div></div>`,
     );
 
     await AccountManager.refreshAccounts();

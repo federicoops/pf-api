@@ -1,3 +1,5 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+
 body.full {
     margin: 0;
     padding: 0;
@@ -64,7 +66,7 @@ body.full {
 
 .blur {
     color: transparent;
-    padding: 5px;
+    padding-bottom: 5px;
     text-shadow: 0 0 10px rgba(0,0,0,0.5);
  }
 
