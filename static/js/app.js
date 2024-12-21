@@ -10,26 +10,26 @@ class AppState {
     this.transactionsTable = null;
     this.apiClient = null;
     this.accountLogos = {
-      'FindomesticCC': './img/account-logos/findomestic.png',
-      'FindomesticCD': './img/account-logos/findomestic.png',
-      'Revolut': './img/account-logos/revolut.jpg',
-      'Moneyfarm': './img/account-logos/moneyfarm.jpeg',
-      'Paypal': './img/account-logos/paypal.webp',
-      'Directa' : './img/account-logos/directa.png',
-      'Isybank': './img/account-logos/isybank.jpg',
-      'CAAutoBank': './img/account-logos/caautobank.png',
-      'CartaYOU': './img/account-logos/advanzia.jpeg',
-      'Wise': './img/account-logos/wise.png',
+      FindomesticCC: "./img/account-logos/findomestic.png",
+      FindomesticCD: "./img/account-logos/findomestic.png",
+      Revolut: "./img/account-logos/revolut.jpg",
+      Moneyfarm: "./img/account-logos/moneyfarm.jpeg",
+      Paypal: "./img/account-logos/paypal.webp",
+      Directa: "./img/account-logos/directa.png",
+      Isybank: "./img/account-logos/isybank.jpg",
+      CAAutoBank: "./img/account-logos/caautobank.png",
+      CartaYOU: "./img/account-logos/advanzia.jpeg",
+      Wise: "./img/account-logos/wise.png",
     };
     this.accountTypesFormat = {
-      'liq': {name:'Liquidità'},
-      'deps': {name:'Deposito svincolabile'},
-      'depl': {name:'Deposito libero'},
-      'deb': {name:'Debiti'},
-      'debc': {name:'Carta di credito'},
-      'inv':  {name:'Investimenti'},
-      'cred': {name:'Crediti'},	
-    }
+      liq: { name: "Liquidità" },
+      deps: { name: "Deposito svincolabile" },
+      depl: { name: "Deposito libero" },
+      deb: { name: "Debiti" },
+      debc: { name: "Carta di credito" },
+      inv: { name: "Investimenti" },
+      cred: { name: "Crediti" },
+    };
   }
 }
 
@@ -38,8 +38,8 @@ const appState = new AppState();
 const Utils = {
   formatCurrency: (value) => `${value.toFixed(2)} €`,
   formatYield: (value) => {
-    let direction = (value>=0)? "+":"";
-    return `${direction}${value.toFixed(2)} %`
+    let direction = value >= 0 ? "+" : "";
+    return `${direction}${value.toFixed(2)} %`;
   },
   formatDate: (date) => new Date(date).toISOString().split("T")[0],
   getToday: () => {
@@ -67,35 +67,43 @@ class AccountManager {
 
   static updateAccountTable() {
     if (!appState.accountsTable) return;
-    appState.accountsTable['liq'].clear();
-    appState.accountsTable['deb'].clear();
+    appState.accountsTable["liq"].clear();
+    appState.accountsTable["deb"].clear();
     let totalCash = 0;
     let totalDebt = 0;
     Object.values(appState.accounts).forEach((account) => {
       if ("total" in account && account.total.toFixed(2) != 0) {
-
+        let type = "";
+        if (
+          account.asset_type &&
+          account.asset_type in appState.accountTypesFormat
+        )
+          type = appState.accountTypesFormat[account.asset_type].name;
         let row = {
           name: account.name,
           balance: Utils.formatCurrency(account.total),
-          type:appState.accountTypesFormat[account.asset_type].name
-        }
+          type: type,
+        };
 
-        if(['liq', 'deps', 'depl', 'cred', 'inv'].includes(account.asset_type)) {
+        if (
+          type == "" ||
+          ["liq", "deps", "depl", "cred", "inv"].includes(account.asset_type)
+        ) {
           totalCash += account.total;
-          appState.accountsTable['liq'].row.add(row);
+          appState.accountsTable["liq"].row.add(row);
         }
 
-        if(['deb', 'debc'].includes(account.asset_type)) {
+        if (["deb", "debc"].includes(account.asset_type)) {
           totalDebt += account.total;
-          appState.accountsTable['deb'].row.add(row);
+          appState.accountsTable["deb"].row.add(row);
         }
       }
     });
 
     $("#totalCash").text(Utils.formatCurrency(totalCash));
     $("#totalDebt").text(Utils.formatCurrency(totalDebt));
-    appState.accountsTable['liq'].draw();
-    appState.accountsTable['deb'].draw();
+    appState.accountsTable["liq"].draw();
+    appState.accountsTable["deb"].draw();
   }
 }
 
@@ -107,23 +115,27 @@ class StockManager {
         today,
         today,
         "ticker",
-        true
+        true,
       );
 
-      const investments = await appState.apiClient.listInvestments(Utils.getStartOfTime(), Utils.getToday());
+      const investments = await appState.apiClient.listInvestments(
+        Utils.getStartOfTime(),
+        Utils.getToday(),
+      );
 
       investments.forEach((investment) => {
-        if(!(investment.account in appState.brokers)) 
+        if (!(investment.account in appState.brokers))
           appState.brokers[investment.account] = {
-            account: investment.account, 
-            tickers: [], 
-            liquidity: appState.accounts[investment.account].total
-          }
-        
-          appState.brokers[investment.account].tickers.push({ticker: investment.ticker, quantity: investment.quantity})
-        
+            account: investment.account,
+            tickers: [],
+            liquidity: appState.accounts[investment.account].total,
+          };
 
-      })
+        appState.brokers[investment.account].tickers.push({
+          ticker: investment.ticker,
+          quantity: investment.quantity,
+        });
+      });
       stockAssets.forEach((stock) => {
         appState.stocks[stock._id] = stock;
 
@@ -131,7 +143,7 @@ class StockManager {
           const stockData = appState.stocks[stock._id];
           stockData.price = data.price;
           stockData.current_value = data.price * stockData.quantity;
-          stockData.daily_yield = data.daily_yield
+          stockData.daily_yield = data.daily_yield;
           UIManager.refresh();
         });
       });
@@ -143,26 +155,24 @@ class StockManager {
   }
 
   static updateBrokersTable() {
-    if(!appState.brokersTable) return;
+    if (!appState.brokersTable) return;
     appState.brokersTable.clear();
     Object.values(appState.brokers).forEach((broker) => {
       let broker_value = 0;
       broker.tickers.forEach((stock) => {
-        let stockData = appState.stocks[stock.ticker]
-        broker_value+=stockData.price*stock.quantity
-      })
+        let stockData = appState.stocks[stock.ticker];
+        broker_value += stockData.price * stock.quantity;
+      });
 
       appState.brokersTable.row.add([
         appState.accounts[broker.account].name,
         Utils.formatCurrency(broker_value || 0),
         Utils.formatCurrency(broker.liquidity || 0),
-        (broker.liquidity>broker_value*2/1000)? "OK": "Poca liquiditá "
-      ])
-
-    })
-    appState.brokersTable.draw()
+        broker.liquidity > (broker_value * 2) / 1000 ? "OK" : "Poca liquiditá ",
+      ]);
+    });
+    appState.brokersTable.draw();
   }
-
 
   static updateStocksTable() {
     if (!appState.stocksTable) return;
@@ -174,7 +184,9 @@ class StockManager {
       const current_value = stock.current_value
         ? Utils.formatCurrency(stock.current_value)
         : null;
-      const price = stock.price ? `${Utils.formatCurrency(stock.price)} (${Utils.formatYield(stock.daily_yield)})` : null;
+      const price = stock.price
+        ? `${Utils.formatCurrency(stock.price)} (${Utils.formatYield(stock.daily_yield)})`
+        : null;
       const current_yield = stock.current_value
         ? `+${((stock.current_value / stock.total_wfee - 1) * 100).toFixed(2)}%`
         : "N/A";
@@ -191,13 +203,15 @@ class StockManager {
     });
 
     $("#currentTotal").text(Utils.formatCurrency(total));
-    if(totalInvested)
-      $("#totalInv").text(`(+${(100*(total/totalInvested-1)).toFixed(2)}%)`);
+    if (totalInvested)
+      $("#totalInv").text(
+        `(+${(100 * (total / totalInvested - 1)).toFixed(2)}%)`,
+      );
     appState.stocksTable.draw();
   }
 
   static updateStocksTableWeighted() {
-    if(!appState.weightedStocksTable) return;
+    if (!appState.weightedStocksTable) return;
     appState.weightedStocksTable.clear();
     let total = 0;
     let totalInvested = 0;
@@ -233,23 +247,21 @@ class NetManager {
       const cashNet = await appState.apiClient.aggregateTransactions(
         Utils.getStartOfTime(),
         Utils.getToday(),
-        "account"
+        "account",
       );
-
 
       const categories = await appState.apiClient.aggregateTransactions(
         Utils.getStartOfTime(),
         Utils.getToday(),
-        "category"
-      )
-    
+        "category",
+      );
+
       categories.forEach((category) => {
-        appState.categories[category['_id']] = {name:category['_id']}
-      })
+        appState.categories[category["_id"]] = { name: category["_id"] };
+      });
 
       cashNet.forEach((accountNet) => {
         if (appState.accounts[accountNet._id]) {
-
           appState.accounts[accountNet._id].total = accountNet.total;
         }
       });
@@ -263,24 +275,21 @@ class NetManager {
   static async updateTotalNetWorth() {
     const totalNet = Object.values(appState.accounts).reduce(
       (sum, acc) => sum + (acc.total || 0),
-      0
+      0,
     );
 
     const totalStocks = Object.values(appState.stocks).reduce(
       (sum, stock) => sum + (stock.current_value || 0),
-      0
+      0,
     );
 
     const totalNetWorth = totalNet + totalStocks;
 
-    $("#total-net-worth").text(
-      `${Utils.formatCurrency(totalNetWorth)}`
-    );
+    $("#total-net-worth").text(`${Utils.formatCurrency(totalNetWorth)}`);
   }
 }
 
 class UIManager {
-
   static menuItems = [
     { href: "./", label: "Home" },
     { href: "./new.html", label: "Nuovo movimento" },
@@ -295,28 +304,29 @@ class UIManager {
     AccountManager.updateAccountTable();
     StockManager.updateStocksTable();
     NetManager.updateTotalNetWorth();
-    StockManager.updateStocksTableWeighted()
-    StockManager.updateBrokersTable()
+    StockManager.updateStocksTableWeighted();
+    StockManager.updateBrokersTable();
   }
 
   static populateDropdown(selector, items, defaultOption) {
     const dropdown = $(selector);
-    console.log(dropdown)
     dropdown.empty();
-    dropdown.append(`<option value="" disabled selected>${defaultOption}</option>`);
-    for(let item in items) {
-      console.log(item)
-      console.log(items[item])
+    dropdown.append(
+      `<option value="" disabled selected>${defaultOption}</option>`,
+    );
+    for (let item in items) {
       dropdown.append(`<option value="${item}">${items[item].name}</option>`);
     }
   }
 
   static generateMenu() {
     const currentPage = window.location.pathname.split("/").pop();
-    this.menuItems.forEach(item => {
-      const menuItem = $(`<a href="${item.href}" class="btn btn-light show-after-login">${item.label}</a>`);
+    this.menuItems.forEach((item) => {
+      const menuItem = $(
+        `<a href="${item.href}" class="btn btn-light show-after-login">${item.label}</a>`,
+      );
       if (item.href.split("/").pop() === currentPage) {
-          menuItem.removeClass('btn-light').addClass('btn-primary');
+        menuItem.removeClass("btn-light").addClass("btn-primary");
       }
       $("#menu").append(menuItem);
     });
@@ -325,22 +335,21 @@ class UIManager {
 
 async function onLoginSuccess() {
   try {
-
     const user = await appState.apiClient.getMe();
     $(".hide-after-login").hide();
 
     $("#login-feedback").html(
-      `<div class="alert alert-success">Ciao, <b>${user.username}</b><div>Patrimonio attuale: <span class="blur" id="total-net-worth"></span></div></div>`
+      `<div class="alert alert-success">Ciao, <b>${user.username}</b><div>Patrimonio attuale: <span class="blur" id="total-net-worth"></span></div></div>`,
     );
 
     await AccountManager.refreshAccounts();
-    UIManager.generateMenu()
+    UIManager.generateMenu();
 
     $(".show-after-login").show();
   } catch (error) {
     console.error("Error during login success process:", error);
     $("#login-feedback").html(
-      `<div class="alert alert-danger">Login failed. Please try again.</div>`
+      `<div class="alert alert-danger">Login failed. Please try again.</div>`,
     );
     redirectToLogin();
   }
@@ -348,26 +357,26 @@ async function onLoginSuccess() {
 
 function redirectToLogin() {
   const currentUrl = window.location.href;
-  if(!currentUrl.endsWith(".html")) return;
+  if (!currentUrl.endsWith(".html")) return;
   const newUrl = currentUrl.replace(/\/[^/]+\.html$/, "/");
   window.location.replace(newUrl);
 }
 
 function getBaseUrl() {
   const currentUrl = window.location.href;
-  const appIndex = currentUrl.indexOf('/app/');
+  const appIndex = currentUrl.indexOf("/app/");
 
   // If "/app/" exists in the URL, strip everything after it
   if (appIndex !== -1) {
-      return currentUrl.substring(0, appIndex); // Include the trailing slash
+    return currentUrl.substring(0, appIndex); // Include the trailing slash
   }
 
   // Fallback: return the root if "/app/" is not found
-  return '/';
+  return "/";
 }
 
 async function boot() {
-  $(".show-after-login").hide()
+  $(".show-after-login").hide();
   const host = getBaseUrl();
   appState.apiClient = new ApiClient(`${host}`);
   if (appState.apiClient.isLogged()) {
@@ -377,9 +386,9 @@ async function boot() {
     } catch (error) {
       appState.apiClient.accessToken = null;
       window.localStorage.removeItem("token");
-      redirectToLogin()
+      redirectToLogin();
     }
   } else {
-    redirectToLogin()
+    redirectToLogin();
   }
 }
