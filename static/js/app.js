@@ -20,6 +20,15 @@ class AppState {
       'CAAutoBank': './img/account-logos/caautobank.png',
       'CartaYOU': './img/account-logos/advanzia.jpeg',
       'Wise': './img/account-logos/wise.png',
+    };
+    this.accountTypesFormat = {
+      'liq': {name:'Liquidità'},
+      'deps': {name:'Deposito svincolabile'},
+      'depl': {name:'Deposito libero'},
+      'deb': {name:'Debiti'},
+      'debc': {name:'Carta di credito'},
+      'inv':  {name:'Investimenti'},
+      'cred': {name:'Crediti'},	
     }
   }
 }
@@ -58,22 +67,35 @@ class AccountManager {
 
   static updateAccountTable() {
     if (!appState.accountsTable) return;
-    appState.accountsTable.clear();
-    let total = 0;
+    appState.accountsTable['liq'].clear();
+    appState.accountsTable['deb'].clear();
+    let totalCash = 0;
+    let totalDebt = 0;
     Object.values(appState.accounts).forEach((account) => {
       if ("total" in account && account.total.toFixed(2) != 0) {
-        total += account.total;
-        appState.accountsTable.row.add(
-          {
-            name: account.name,
-            balance: Utils.formatCurrency(account.total),
-            type:account.asset_type
-          });
+
+        let row = {
+          name: account.name,
+          balance: Utils.formatCurrency(account.total),
+          type:appState.accountTypesFormat[account.asset_type].name
+        }
+
+        if(['liq', 'deps', 'depl', 'cred', 'inv'].includes(account.asset_type)) {
+          totalCash += account.total;
+          appState.accountsTable['liq'].row.add(row);
+        }
+
+        if(['deb', 'debc'].includes(account.asset_type)) {
+          totalDebt += account.total;
+          appState.accountsTable['deb'].row.add(row);
+        }
       }
     });
 
-    $("#totalCash").text(Utils.formatCurrency(total));
-    appState.accountsTable.draw();
+    $("#totalCash").text(Utils.formatCurrency(totalCash));
+    $("#totalDebt").text(Utils.formatCurrency(totalDebt));
+    appState.accountsTable['liq'].draw();
+    appState.accountsTable['deb'].draw();
   }
 }
 
@@ -279,9 +301,12 @@ class UIManager {
 
   static populateDropdown(selector, items, defaultOption) {
     const dropdown = $(selector);
+    console.log(dropdown)
     dropdown.empty();
     dropdown.append(`<option value="" disabled selected>${defaultOption}</option>`);
     for(let item in items) {
+      console.log(item)
+      console.log(items[item])
       dropdown.append(`<option value="${item}">${items[item].name}</option>`);
     }
   }

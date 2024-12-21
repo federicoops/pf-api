@@ -37,7 +37,7 @@ $(document).ready(async function () {
                 accountsTable.row.add({
                     id: account._id,
                     name: account.name,
-                    type: account.asset_type,
+                    type: appState.accountTypesFormat[account.asset_type].name,
                     info: account.info,
                     balance: total.toFixed(2)+" €"
                 });                    
@@ -52,7 +52,8 @@ $(document).ready(async function () {
     
     // Initialize the page by loading accounts
     await loadAccounts();
-
+    UIManager.populateDropdown("#accountType", appState.accountTypesFormat, "Seleziona tipologia")
+    UIManager.populateDropdown("#editAccountType", appState.accountTypesFormat, "Seleziona tipologia")
 
     // Handle create account
     $("#createAccountForm").on("submit", async function (event) {

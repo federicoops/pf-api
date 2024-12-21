@@ -60,8 +60,11 @@
             </div>
             <div class="mb-3">
               <label for="accountType" class="form-label">Tipo conto</label>
-              <input type="text" class="form-control" id="accountType" required>
-            </div>
+              <select class="form-select" id="accountType" reddit>
+                <option value="" disabled selected>
+                  Seleziona tipologia
+                </option>
+              </select></div>
             <div class="mb-3">
               <label for="accountBalance" class="form-label">Disponibile iniziale</label>
               <input type="number" class="form-control" id="accountBalance" required>
@@ -90,11 +93,16 @@
             </div>
             <div class="mb-3">
               <label for="editAccountType" class="form-label">Tipo conto</label>
-              <input type="text" class="form-control" id="editAccountType">
+              <select class="form-select" id="editAccountType" reddit>
+                <option value="" disabled selected>
+                  Seleziona tipologia
+                </option>
+              </select>
             </div>
             <div class="mb-3">
               <label for="editAccountInfo" class="form-label">Altre informazioni</label>
               <input type="text" class="form-control" id="editAccountInfo">
+
             </div>
             <button type="submit" class="btn btn-primary">Modifica</button>
           </form>
