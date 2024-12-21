@@ -298,6 +298,8 @@ class UIManager {
     { href: "./accounts.html", label: "Conti", icon: "bi-bank" },
     { href: "./year.html", label: "Vista anno", icon: "bi-calendar" },
     { href: "./inv.html", label: "Investimenti", icon: "bi-graph-up" },
+    { href: "./planning.html", label: "Pianificazione", icon: "bi-calendar-event" },
+
   ];
 
   static refresh() {
