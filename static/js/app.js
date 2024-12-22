@@ -48,6 +48,8 @@ const Utils = {
     return today.toISOString().split("T")[0];
   },
   getStartOfTime: () => new Date(1900, 0, 2).toISOString().split("T")[0],
+  // Generate UUID identifier
+  generateUUID: () =>  crypto.randomUUID()
 };
 
 class AccountManager {

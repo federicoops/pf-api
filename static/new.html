@@ -42,27 +42,50 @@
                 <form id="basic-transaction-form">
                     <div class="mb-3">
                         <label for="basic-date" class="form-label">Data</label>
-                        <input type="date"  class="form-control" id="basic-date" required>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                            <input type="date"  class="form-control" id="basic-date" required>
+                        </div>
                     </div>
+                    
                     <div class="mb-3">
                         <label for="basic-description" class="form-label">Descrizione</label>
-                        <input type="text" class="form-control" id="basic-description">
-                    </div>                    
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                            <input type="text" class="form-control" id="basic-description">
+                        </div>
+                    </div>     
+                    
+                    
                     <div class="mb-3">
                         <label for="basic-category" class="form-label">Categoria</label>
-                        <select class="form-control form-category" id="basic-category" required>
-                            <option value="" disabled selected>Scegli categoria</option>
-                        </select>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                            <select class="form-control form-category" id="basic-category" required>
+                                <option value="" disabled selected>Scegli categoria</option>
+                            </select>
+                        </div>
+
                     </div>
+
                     <div class="mb-3">
                         <label for="basic-amount" class="form-label">Importo</label>
-                        <input type="number" step="any" class="form-control" id="basic-amount" required>
+                        <div class="input-group mb-3">
+                              <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+                            <input type="number" step="any" class="form-control" id="basic-amount" required>
+                        </div>
                     </div>
+
+
                     <div class="mb-3">
                         <label for="basic-account" class="form-label">Conto</label>
-                        <select class="form-select" id="basic-account" required>
-                            <option value="" disabled selected>Scegli conto</option>
-                        </select>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="bi bi-bank"></i></span>
+                            <select class="form-select" id="basic-account" required>
+                                <option value="" disabled selected>Scegli conto</option>
+                            </select>
+                        </div>
+
                     </div>
                     <button type="submit" class="btn btn-primary">Aggiungi</button>
                 </form>
