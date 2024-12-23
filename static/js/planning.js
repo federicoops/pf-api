@@ -9,7 +9,6 @@ $(document).ready(async function() {
     }
 
     function initializeBoard() {
-        
         for (const [id, account] of Object.entries(appState.accounts)) {
             if (['liq', 'deps', 'depl'].includes(account.asset_type) && !(id in accountPosition)) {
                 const accountCard = $(
@@ -55,7 +54,9 @@ $(document).ready(async function() {
                 $(`#${position.id}`).append(accountCard);
                 updateColumnBudget($(`#${position.id}`));
             }
-        } 
+        } else {
+          addColumn('Accounts', 'accounts');
+        }
         initializeBoard();
 
     }

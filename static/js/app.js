@@ -343,8 +343,15 @@ async function onLoginSuccess() {
     $(".hide-after-login").hide();
 
     $("#login-feedback").html(
-      `<div class="alert alert-primary">Ciao, <b>${user.username}</b><div>Patrimonio attuale: <span class="blur" id="total-net-worth"></span></div></div>`,
+      `<div class="alert alert-primary lead">Ciao, <b>${user.username}</b> <button id="toggle-eye" class="btn"><i class="bi bi-eye-slash"></i></button><div >Patrimonio attuale: <span class="blur-this blur" id="total-net-worth"></span></div></div>`,
     );
+
+    $("#toggle-eye").click(() => {	
+      $(".blur-this").toggleClass("blur");	
+      $("#toggle-eye i").toggleClass("bi-eye-slash");	
+      $("#toggle-eye i").toggleClass("bi-eye");	
+
+    });
 
     await AccountManager.refreshAccounts();
     UIManager.generateMenu();
