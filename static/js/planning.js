@@ -10,7 +10,7 @@ $(document).ready(async function() {
 
     function initializeBoard() {
         for (const [id, account] of Object.entries(appState.accounts)) {
-            if (['liq', 'deps', 'depl'].includes(account.asset_type) && !(id in accountPosition)) {
+            if (['liq', 'deps', 'depl', 'inv'].includes(account.asset_type) && !(id in accountPosition)) {
                 const accountCard = $(
                 `<div data-id=${id} class="kanban-card card mb-2" style="cursor: grab;">
                     <div class="card-body p-2">

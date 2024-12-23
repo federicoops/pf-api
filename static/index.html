@@ -45,24 +45,29 @@
     <div class="container mt-5">
 
         <!-- Accounts Section -->
-        <div id="accounts-section" class="show-after-login">
-            <h5><i class="bi bi-cash"></i> Liquiditá/Breve termine</h5>
-            <span class="lead"><span class="blur-this blur" id="totalCash"></span></span>
-            <div class="my-3">
-                <div class="table-wrapper">
-                    <table id="accounts-liq-table" class="display" >
-                        <thead>
-                            <tr>
-                                <th><i class="bi bi-bank"></i> Conto</th>
-                                <th><i class="bi bi-currency-euro"></i> Saldo</th>
-                                <th><i class="bi bi-list-columns-reverse"></i> Tipo</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+        <div class="card">
+            <div id="accounts-section" class="card-body show-after-login">
+                <h5 class="card-title"><i class="bi bi-cash"></i> Liquiditá/Breve termine</h5>
+                <span class="lead"><span class="blur-this blur" id="totalCash"></span></span>
+                <div class="my-3">
+                    <div class="table-wrapper">
+                        <table id="accounts-liq-table" class="display" >
+                            <thead>
+                                <tr>
+                                    <th><i class="bi bi-bank"></i> Conto</th>
+                                    <th><i class="bi bi-currency-euro"></i> Saldo</th>
+                                    <th><i class="bi bi-list-columns-reverse"></i> Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="my-5">
+        </div>
+
+        <div class="card mt-5">
+            <div class="card-body">
                 <h5><i class="bi bi-credit-card-2-front"></i> Debiti/Prestiti</h5>
                 <span class="lead"><span class="blur-this blur" id="totalDebt"></span></span>
                 <div class="my-3 table-wrapper">
@@ -79,32 +84,34 @@
                 </div>
             </div>
         </div>
-
         
 
 
         <!-- Stocks Section -->
-        <div id="stocks-section" class="show-after-login my-5">
-            <h5><i class="bi bi-graph-up"></i> Azioni/ETF</h5>
-            <span class="lead"><span class="blur-this blur"><span id="currentTotal"></span><span id="totalInv"></span></span></span>
-            <div class="mt-3">
-                <div class="table-wrapper">
-                    <table id="stocks-table" class="display" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th><i class="bi bi-sticky"></i> Ticker</th>
-                                <th><i class="bi bi-123"></i> Quote</th>
-                                <th><i class="bi bi-cash"></i> Costo</th>
-                                <th><i class="bi bi-currency-euro"></i> Prezzo corr.</th>
-                                <th><i class="bi bi-cash-stack"></i> Controvalore</th>
-                                <th><i class="bi bi-activity"></i> Yield</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>  
+        <div class="card my-5">
+            <div id="stocks-section" class="card-body show-after-login ">
+                <h5><i class="bi bi-graph-up"></i> Azioni/ETF</h5>
+                <span class="lead"><span class="blur-this blur"><span id="currentTotal"></span><span id="totalInv"></span></span></span>
+                <div class="mt-3">
+                    <div class="table-wrapper">
+                        <table id="stocks-table" class="display" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th><i class="bi bi-sticky"></i> Ticker</th>
+                                    <th><i class="bi bi-123"></i> Quote</th>
+                                    <th><i class="bi bi-cash"></i> Costo</th>
+                                    <th><i class="bi bi-currency-euro"></i> Prezzo corr.</th>
+                                    <th><i class="bi bi-cash-stack"></i> Controvalore</th>
+                                    <th><i class="bi bi-activity"></i> Yield</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>  
+                </div>
             </div>
-        </div>        
+        </div>
+             
     </div>
 </body>
 </html>
