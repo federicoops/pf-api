@@ -340,6 +340,12 @@ class UIManager {
 async function onLoginSuccess() {
   try {
     const user = await appState.apiClient.getMe();
+    // Redirect to the page that triggered the login
+    const redirect = localStorage.getItem("redirect");
+    if (redirect) {
+      localStorage.removeItem("redirect");
+      window.location.replace(redirect);
+    }
     $(".hide-after-login").hide();
 
     $("#login-feedback").html(
@@ -370,6 +376,7 @@ function redirectToLogin() {
   const currentUrl = window.location.href;
   if (!currentUrl.endsWith(".html")) return;
   const newUrl = currentUrl.replace(/\/[^/]+\.html$/, "/");
+  localStorage.setItem("redirect", currentUrl);
   window.location.replace(newUrl);
 }
 

@@ -23,9 +23,9 @@
         <div id="menu" class="d-flex flex-column flex-md-row gap-2"></div>
         <hr>
     </div>
-    <div class="container mt-5">
+    <div class="container my-5"><div class="card"><div class="card-body">
         <!-- Tabs for selecting transaction type -->
-        <ul class="nav nav-tabs" id="transactionTabs" role="tablist">
+        <ul class="nav nav-pills nav-fill" id="transactionTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic-transaction" type="button" role="tab">Spesa/Guadagno</button>
             </li>
@@ -89,7 +89,9 @@
                         </div>
 
                     </div>
-                    <button type="submit" class="btn btn-primary">Aggiungi</button>
+                    <div class="d-flex">
+                        <button type="submit" class="btn btn-primary flex-fill">Aggiungi</button>
+                    </div>
                 </form>
             </div>
 
@@ -98,39 +100,65 @@
                 <form id="investment-transaction-form">
                     <div class="mb-3">
                         <label for="investment-date" class="form-label">Data</label>
-                        <input type="date" class="form-control" id="investment-date" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                            <input type="date" class="form-control" id="investment-date" required>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="investment-description" class="form-label">Descrizione</label>
-                        <input type="text" class="form-control" id="investment-description">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                            <input type="text" class="form-control" id="investment-description">
+                        </div>
                     </div>                          
                     <div class="mb-3">
                         <label for="investment-amount" class="form-label">Importo</label>
-                        <input type="number" step="any" class="form-control" id="investment-amount" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+                            <input type="number" step="any" class="form-control" id="investment-amount" required>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="investment-account" class="form-label">Conto</label>
-                        <select class="form-select" id="investment-account" required>
-                            <option value="" disabled selected>Seleziona conto</option>
-                        </select>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-bank"></i></span>
+                            <select class="form-select" id="investment-account" required>
+                                <option value="" disabled selected>Scegli conto</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="investment-ticker"  class="form-label">Ticker</label>
-                        <input type="text" class="form-control" onchange="updatePrice();" id="investment-ticker" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-bar-chart"></i></span>
+                            <input type="text" class="form-control" onchange="updatePrice();" id="investment-ticker" required>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="investment-quantity" class="form-label">Quote</label>
-                        <input type="number" step="any" onchange="updateAmountInv();" class="form-control" id="investment-quantity" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-123"></i></span>
+                            <input type="number" step="any" onchange="updateAmountInv();" class="form-control" id="investment-quantity" required>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="investment-price" class="form-label">Prezzo</label>
-                        <input type="number" step="any" onchange="updateAmountInv();" class="form-control" id="investment-price" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+                            <input type="number" step="any" onchange="updateAmountInv();" class="form-control" id="investment-price" required>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="investment-fee" class="form-label">Fee</label>
-                        <input type="number" step="any" placeholder="0,0" onchange="updateAmountInv();" class="form-control" id="investment-fee" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+                            <input type="number" step="any" placeholder="0,0" onchange="updateAmountInv();" class="form-control" id="investment-fee" required>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Aggiungi</button>
+                    <div class="d-flex">
+                        <button type="submit" class="btn btn-primary flex-fill">Aggiungi</button>
+                    </div>
                 </form>
             </div>
 
@@ -139,33 +167,50 @@
                 <form id="transfer-transaction-form">
                     <div class="mb-3">
                         <label for="transfer-date" class="form-label">Data</label>
-                        <input type="date" class="form-control" id="transfer-date" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                            <input type="date" class="form-control" id="transfer-date" required>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="transfer-description" class="form-label">Descrizione</label>
-                        <input type="text" class="form-control" id="transfer-description">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                            <input type="text" class="form-control" id="transfer-description">
+                        </div>
                     </div>                      
                     <div class="mb-3">
                         <label for="transfer-amount" class="form-label">Importo</label>
-                        <input type="number" step="any" class="form-control" id="transfer-amount" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+                            <input type="number" step="any" class="form-control" id="transfer-amount" required>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="transfer-from-account" class="form-label">Conto partenza</label>
-                        <select class="form-select" id="transfer-from-account" required>
-                            <option value="" disabled selected>Seleziona conto</option>
-                        </select>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-box-arrow-up"></i></span>
+                            <select class="form-select" id="transfer-from-account" required>
+                                <option value="" disabled selected>Scegli conto</option>
+                            </select>
+                        </div>  
                     </div>
                     <div class="mb-3">
                         <label for="transfer-to-account" class="form-label">Conto destinazione</label>
-                        <select class="form-select" id="transfer-to-account" required>
-                            <option value="" disabled selected>Seleziona conto</option>
-                        </select>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-box-arrow-in-down"></i></span>
+                            <select class="form-select" id="transfer-to-account" required>
+                                <option value="" disabled selected>Scegli conto</option>
+                            </select>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Aggiungi</button>
+                    <div class="d-flex">
+                        <button type="submit" class="btn btn-primary flex-fill">Aggiungi</button>
+                    </div>
                 </form>
             </div>
         </div>
-    </div>
+    </div></div></div>
 
 
     <script>
