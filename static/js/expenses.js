@@ -1,37 +1,102 @@
 $(document).ready(async function () {
     await boot()
-    const currentYear = new Date()
-    let transactionData = await appState.apiClient.getOverview(currentYear.getFullYear())
- 
-    // Transform data into a pivot table format
-    const pivotData = {};
-    const monthlyTotals = Array(12).fill(0);
-    transactionData.forEach(({ _id, total }) => {
-        if(_id.category == "Trasferimento" || _id.category == "Investimento") return;
-        if(total > 0) return;
-        if (!pivotData[_id.category]) pivotData[_id.category] = Array(12).fill(0);
-        pivotData[_id.category][_id.month - 1] = total;
-        
-        // Update monthly totals
-        monthlyTotals[_id.month - 1] += total;
-    });
 
-    // Add total row
-    const tbody = $("#transactionsTable tbody");
+    function initializeYearSelector() {
+        const currentYear = new Date().getFullYear();
+        const yearSelector = $("#yearSelector");
+    
+        // Populate options for the last 3 years up to the current year
+        for (let year = currentYear - 3; year <= currentYear; year++) {
+            const selected = year === currentYear ? "selected" : "";
+            yearSelector.append(
+                `<option value="${year}" ${selected}>${year}</option>`,
+            );
+        }
+    }
 
-    const totalRow = `<tr class="table-primary">
-        <td><strong>Totale</strong></td>
-        ${monthlyTotals.map(total => `<td class="text-right"><strong>${total.toFixed(2)+" €"}</strong></td>`).join('')}
-    </tr>`;
-    tbody.append(totalRow);
+    function initializeMonthSelector() {
+        const currentMonth = new Date().getMonth() + 1;
+        const monthSelector = $("#monthSelector");
+        monthSelector.val(currentMonth);
+    }
 
-    // Populate table rows
-    Object.entries(pivotData).forEach(([category, months]) => {
-        const row = `<tr>
-            <td>${category}</td>
-            ${months.map(amount => `<td class="text-right">${amount.toFixed(2)+" €" || 0}</td>`).join('')}
+    let transactionData = []
+    async function fetchCategoryExpenses(currentYear, currentMonth) {
+        $(".loaded").hide()
+        transactionData = await appState.apiClient.getOverview(currentYear)
+        $(".loaded").show()
+        $(".loading").hide()
+
+
+        // Transform data into a pivot table format
+        const pivotData = {};
+        const monthlyTotals = Array(12).fill(0);
+        transactionData.forEach(({ _id, total }) => {
+            if(_id.category == "Trasferimento" || _id.category == "Investimento") return;
+            if(total > 0) return;
+            if (!pivotData[_id.category]) pivotData[_id.category] = Array(12).fill(0);
+            pivotData[_id.category][_id.month - 1] = total;
+            
+            // Update monthly totals
+            monthlyTotals[_id.month - 1] += total;
+        });
+
+        // Add total row
+        const tbody = $("#transactionsTable tbody");
+        tbody.empty(); // Clear existing rows
+        const totalRow = `<tr class="table-primary">
+            <td><strong>Totale</strong></td>
+            ${monthlyTotals.map(total => `<td class="text-right"><strong>${total.toFixed(2)+" €"}</strong></td>`).join('')}
         </tr>`;
-        tbody.append(row);
+        tbody.append(totalRow);
+
+        // Populate table rows
+        Object.entries(pivotData).forEach(([category, months]) => {
+            // Update yearly table with category expense
+            const row = `<tr>
+                <td>${category}</td>
+                ${months.map(amount => `<td class="text-right">${amount.toFixed(2)+" €" || 0}</td>`).join('')}
+            </tr>`;
+            tbody.append(row);
+        });
+
+        // Populate selected month table from pivot data selecting only the category expenses for the selected month
+        const selectedMonthTable = $("#categoriesTable tbody");
+        selectedMonthTable.empty(); // Clear existing rows
+
+        // Add total row for the current month
+        const currentMonthTotal = monthlyTotals[currentMonth - 1];
+        const totalRowSelectedMonth = `<tr class="table-primary">
+            <td><strong>Totale</strong></td>
+            <td class="text-right"><strong>${currentMonthTotal.toFixed(2)+" €"}</strong></td>
+        </tr>`;
+        selectedMonthTable.append(totalRowSelectedMonth);
+
+        Object.entries(pivotData).forEach(([category, months]) => {
+            if(months[currentMonth - 1].toFixed(2) == 0) return;
+            const row = `<tr>
+                <td>${category}</td>
+                <td class="text-right">${months[currentMonth - 1].toFixed(2)+" €" || 0}</td>
+            </tr>`;
+            selectedMonthTable.append(row);
+        });
+
+
+    }
+
+    initializeYearSelector()
+    initializeMonthSelector()
+    const currentYear = $("#yearSelector").val()
+    const currentMonth = $("#monthSelector").val()
+
+    await fetchCategoryExpenses(currentYear, currentMonth)
+    // Initialize DataTable
+    $("#categoriesTable").DataTable({
+        paging: false,
+        searching: false,
+        info: false,
+        ordering: true,
+        order: [[1, "asc"]]
     });
 
     // Initialize DataTable
@@ -39,7 +104,14 @@ $(document).ready(async function () {
         paging: false,
         searching: false,
         info: false,
-        ordering: false
+        ordering: false,
+    });
+
+    // Add action to load button to fetch data for the selected year and month
+    $("#loadBalances").on("click", async function () {
+        const currentYear = $("#yearSelector").val()
+        const currentMonth = $("#monthSelector").val()
+        await fetchCategoryExpenses(currentYear, currentMonth)
     });
 
     // Local Storage Keys

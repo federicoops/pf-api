@@ -26,8 +26,54 @@
         <div id="menu" class="d-flex flex-column flex-md-row gap-2"></div>
         <hr>
         <div class="row">
+                  <!-- Specific month expense categories -->
+            <div class="col-lg-6">
+                <div class="card"><div class="card-body">
+                    <div class="d-flex ">
+                        <select class="form-select m-2" name="year-selector" id="yearSelector">
+                            <option value="" disabled selected>Seleziona Anno</option>
+                        </select>
+                        <select class="form-select m-2" name="monthSelector" id="monthSelector">
+                            <option value="" disabled selected>Seleziona Mese</option>
+                            <option value="1">Gennaio</option>
+                            <option value="2">Febbraio</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Aprile</option>
+                            <option value="5">Maggio</option>
+                            <option value="6">Giugno</option>
+                            <option value="7">Luglio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Settembre</option>
+                            <option value="10">Ottobre</option>
+                            <option value="11">Novembre</option>
+                            <option value="12">Dicembre</option>
+                        </select>
+                        <button id="loadBalances" class="btn btn-primary m-2">
+                            <span class="loaded">Carica</span>
+                            <span class="loading spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="loading sr-only">Caricamento...</span>
+                        </button>
+                    </div>
+                </div></div>
+
+                <div class="card mt-3"><div class="card-body">
+                    <div class="table-wrapper">
+                        <table id="categoriesTable" class="table table-striped display">
+                            <thead>
+                                <tr>
+                                    <th>Categoria</th>
+                                    <th>Importo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data will be dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div></div>
+            </div>
             <!-- Planned Expenses Card -->
-            <div class="col-lg-3">
+            <div class="col-lg-6">
                 <div class="card mb-4">
                     <div class="card-body">
                         <form id="incomeForm" class="mb-4">
@@ -76,16 +122,19 @@
                             </table>
                     </div>
                 </div>
-
             </div>
-    
+      
+        </div>
+
+        <div class="row mb-3">
             <!-- Transactions Table -->
-            <div class="col-lg-9">
+            <div class="col-lg-12">
+            <div class="card"><div class="card-body">
                 <div class="table-wrapper">
                 <table id="transactionsTable" class="table table-striped display">
                     <thead>
                         <tr>
-                            <th>Category</th>
+                            <th>Categoria</th>
                             <th>Gennaio</th>
                             <th>Febbraio</th>
                             <th>Marzo</th>
@@ -105,7 +154,7 @@
                     </tbody>
                 </table>
                 </div>  
-            </div>
+            </div></div></div>
         </div>
     </div>
 </body>
