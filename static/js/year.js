@@ -83,8 +83,12 @@ $(document).ready(async function () {
     });
   }
 
-  async function loadBalancesForYear(year) {
+  async function loadBalancesForYear(year, backtrack = true) {
+    if(appState.balances && year in appState.balances) return;
     let balances = {};
+    if(appState.balances && backtrack)
+      balances = JSON.parse(JSON.stringify(appState.balances[year-1].investmentBalances)) || {};
+
     let quotes = {};
     let totals = Array(12).fill(0); // Initialize totals for each month
     let tickers = new Set();
@@ -116,6 +120,26 @@ $(document).ready(async function () {
       });
     }
 
+    let totalInvested = {0:0.0}
+    let investmentBalances = {}
+    
+    if(appState.balances && backtrack) {
+      lastBalances = JSON.parse(JSON.stringify(appState.balances[year-1].investmentBalances)) || {};
+      for(a in lastBalances) {
+        totalInvested[0] += parseFloat(lastBalances[a][11])
+        if(!investmentBalances[a]) investmentBalances[a] = Array(12).fill(0);
+        for(m in lastBalances[a]) {
+          
+          if(!(m in totals)) totals[m] = 0;
+          totals[m] += lastBalances[a][11];
+          balances[a][m] += lastBalances[a][11];
+          investmentBalances[a][m] += lastBalances[a][11];
+          totalInvested[m] = totalInvested[0];
+        }
+      }
+    }
+
+
     const tickerArr = Array.from(tickers);
     let cachedPrices = undefined;
     if (tickerArr.length > 0)
@@ -123,8 +147,6 @@ $(document).ready(async function () {
         tickerArr.join(","),
         year,
       );
-
-    let totalInvested = {}
     for (a in quotes) {
       let account = quotes[a];
       for (m in account) {
@@ -136,24 +158,26 @@ $(document).ready(async function () {
           monthTotal += price * month[ticker];
         }
         if (!balances[a]) balances[a] = Array(12).fill(0);
+        if(!investmentBalances[a]) investmentBalances[a] = Array(12).fill(0);
         balances[a][m] = monthTotal;
+        investmentBalances[a][m] = monthTotal;
         totals[m] += monthTotal;
         totalInvested[m] += monthTotal
       }
     }
 
-    // Populate table
-    drawTable(balances, totals, quotes);
+    // Prepare a new object containing balances, totals, quotes, totalInvested
+    // use year as key
+    appState.balances = appState.balances || {};
+    console.log(investmentBalances)
+    appState.balances[year] = { balances, totals, quotes, totalInvested, investmentBalances};
 
-    // Plot totals
-    plotAmounts(totals, '#total-holder', `${year}: Patrimonio nel tempo`);
-    plotAmounts(totalInvested, '#inv-holder', `${year}: Investimenti nel tempo`)
   }
 
   function plotAmounts(amounts, selector, caption) {
     let serie = [];
     for (let point in amounts) {
-      let dataPoint = [parseInt(point) + 1, amounts[point]];
+      let dataPoint = [parseInt(point) + 1, amounts[point].toFixed(2)];
       serie.push(dataPoint);
     }
 
@@ -245,17 +269,29 @@ $(document).ready(async function () {
     if (!year) {
       return;
     }
-    doLoad(year);
+    await doLoad(year);
   });
 
   async function doLoad(year = new Date().getFullYear()) {
     $(".loading").show();
     $(".loaded").hide();
     $("#loadBalances").attr("disabled", "disabled");
+    await loadBalancesForYear(year-1, false);
     await loadBalancesForYear(year);
+    render(year);
     $(".loading").hide();
     $(".loaded").show();
     $("#loadBalances").removeAttr("disabled");
+  }
+
+
+  function render(year) {
+    // Populate table
+    drawTable(appState.balances[year].balances, appState.balances[year].totals, appState.balances[year].quotes);
+    // Plot totals
+    plotAmounts(appState.balances[year].totals, '#total-holder', `${year}: Patrimonio nel tempo`);
+    console.log(appState.balances[year].totalInvested)
+    plotAmounts(appState.balances[year].totalInvested, '#inv-holder', `${year}: Investimenti nel tempo`)
   }
 
   // Initialize the page
