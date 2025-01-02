@@ -86,12 +86,15 @@ $(document).ready(async function () {
   async function loadBalancesForYear(year, backtrack = true) {
     if(appState.balances && year in appState.balances) return;
     let balances = {};
-    if(appState.balances && backtrack)
-      balances = JSON.parse(JSON.stringify(appState.balances[year-1].investmentBalances)) || {};
-
     let quotes = {};
-    let totals = Array(12).fill(0); // Initialize totals for each month
     let tickers = new Set();
+    if(appState.balances && backtrack) {
+      quotes = JSON.parse(JSON.stringify(appState.balances[year-1].quotes));
+      tickers = appState.balances[year-1].tickers;
+    }
+
+    let totals = Array(12).fill(0); // Initialize totals for each month
+    
     for (let month = 1; month <= 12; month++) {
       const startDate = Utils.getStartOfTime();
       const startOfMonth = new Date(year, month - 1, 0)
@@ -123,23 +126,6 @@ $(document).ready(async function () {
     let totalInvested = {0:0.0}
     let investmentBalances = {}
     
-    if(appState.balances && backtrack) {
-      lastBalances = JSON.parse(JSON.stringify(appState.balances[year-1].investmentBalances)) || {};
-      for(a in lastBalances) {
-        totalInvested[0] += parseFloat(lastBalances[a][11])
-        if(!investmentBalances[a]) investmentBalances[a] = Array(12).fill(0);
-        for(m in lastBalances[a]) {
-          
-          if(!(m in totals)) totals[m] = 0;
-          totals[m] += lastBalances[a][11];
-          balances[a][m] += lastBalances[a][11];
-          investmentBalances[a][m] += lastBalances[a][11];
-          totalInvested[m] = totalInvested[0];
-        }
-      }
-    }
-
-
     const tickerArr = Array.from(tickers);
     let cachedPrices = undefined;
     if (tickerArr.length > 0)
@@ -147,6 +133,7 @@ $(document).ready(async function () {
         tickerArr.join(","),
         year,
       );
+
     for (a in quotes) {
       let account = quotes[a];
       for (m in account) {
@@ -154,6 +141,10 @@ $(document).ready(async function () {
         let monthTotal = 0;
         if(!(m in totalInvested)) totalInvested[m] = 0
         for (ticker in month) {
+          if(!(m in cachedPrices)) {
+            monthTotal = balances[a][m-1];
+            continue;
+          };
           let price = cachedPrices[m][tickerArr.indexOf(ticker)];
           monthTotal += price * month[ticker];
         }
@@ -169,8 +160,7 @@ $(document).ready(async function () {
     // Prepare a new object containing balances, totals, quotes, totalInvested
     // use year as key
     appState.balances = appState.balances || {};
-    console.log(investmentBalances)
-    appState.balances[year] = { balances, totals, quotes, totalInvested, investmentBalances};
+    appState.balances[year] = { balances, totals, quotes, totalInvested, investmentBalances, tickers};
 
   }
 
@@ -290,7 +280,6 @@ $(document).ready(async function () {
     drawTable(appState.balances[year].balances, appState.balances[year].totals, appState.balances[year].quotes);
     // Plot totals
     plotAmounts(appState.balances[year].totals, '#total-holder', `${year}: Patrimonio nel tempo`);
-    console.log(appState.balances[year].totalInvested)
     plotAmounts(appState.balances[year].totalInvested, '#inv-holder', `${year}: Investimenti nel tempo`)
   }
 
